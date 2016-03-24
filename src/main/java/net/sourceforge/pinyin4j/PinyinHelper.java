@@ -258,6 +258,8 @@ public class PinyinHelper {
                                              String separate, boolean retain) throws BadHanyuPinyinOutputFormatCombination {
         ChineseToPinyinResource resource = ChineseToPinyinResource.getInstance();
         StringBuilder resultPinyinStrBuf = new StringBuilder();
+        if (str == null || (str = str.trim()).length() == 0)
+            return EMPTY;
 
         char[] chars = str.toCharArray();
 
@@ -287,14 +289,13 @@ public class PinyinHelper {
 
             if (result == null) {//如果在前缀树中没有匹配到，那么它就不能转换为拼音，直接输出或者去掉
                 if (retain) resultPinyinStrBuf.append(chars[i]);
+                resultPinyinStrBuf.append(separate);
             } else {
                 String[] pinyinStrArray = resource.parsePinyinString(result);
                 if (pinyinStrArray != null) {
-                    for (int j = 0; j < pinyinStrArray.length; j++) {
-                        resultPinyinStrBuf.append(PinyinFormatter.formatHanyuPinyin(pinyinStrArray[j], outputFormat));
-                        if (current < chars.length || (j < pinyinStrArray.length - 1 && i != success)) {//不是最后一个,(也不是拼音的最后一个,并且不是最后匹配成功的)
-                            resultPinyinStrBuf.append(separate);
-                        }
+                    for (String aPinyinStrArray : pinyinStrArray) {
+                        resultPinyinStrBuf.append(PinyinFormatter.formatHanyuPinyin(aPinyinStrArray, outputFormat));
+                        resultPinyinStrBuf.append(separate);
                         if (i == success)
                             break;
                     }
@@ -302,7 +303,7 @@ public class PinyinHelper {
             }
             i = success;
         }
-
+        resultPinyinStrBuf.setLength(resultPinyinStrBuf.length() - 1);
         return resultPinyinStrBuf.toString();
     }
 
