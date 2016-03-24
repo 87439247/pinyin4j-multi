@@ -258,6 +258,7 @@ public class PinyinHelper {
   static public String toHanYuPinyinString(String str, HanyuPinyinOutputFormat outputFormat,
       String separate, boolean retain, boolean firstLetter)
       throws BadHanyuPinyinOutputFormatCombination {
+    if (separate == null) separate = "";
     ChineseToPinyinResource resource = ChineseToPinyinResource.getInstance();
     StringBuilder resultPinyinStrBuf = new StringBuilder();
     if (str == null || (str = str.trim()).length() == 0) return EMPTY;
@@ -304,7 +305,7 @@ public class PinyinHelper {
       i = success;
     }
 
-    resultPinyinStrBuf.setLength(resultPinyinStrBuf.length() - 1);
+    resultPinyinStrBuf.setLength(resultPinyinStrBuf.length() - separate.length());
     return resultPinyinStrBuf.toString();
   }
 
