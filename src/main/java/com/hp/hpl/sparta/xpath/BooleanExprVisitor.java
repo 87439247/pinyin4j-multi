@@ -23,23 +23,23 @@ package com.hp.hpl.sparta.xpath;
  */
 public interface BooleanExprVisitor {
 
-  void visit(TrueExpr a);
+    void visit(TrueExpr a);
 
-  void visit(AttrExistsExpr a) throws XPathException;
+    void visit(AttrExistsExpr a) throws XPathException;
 
-  void visit(AttrEqualsExpr a) throws XPathException;
+    void visit(AttrEqualsExpr a) throws XPathException;
 
-  void visit(AttrNotEqualsExpr a) throws XPathException;
+    void visit(AttrNotEqualsExpr a) throws XPathException;
 
-  void visit(AttrLessExpr a) throws XPathException;
+    void visit(AttrLessExpr a) throws XPathException;
 
-  void visit(AttrGreaterExpr a) throws XPathException;
+    void visit(AttrGreaterExpr a) throws XPathException;
 
-  void visit(TextExistsExpr a) throws XPathException;
+    void visit(TextExistsExpr a) throws XPathException;
 
-  void visit(TextEqualsExpr a) throws XPathException;
+    void visit(TextEqualsExpr a) throws XPathException;
 
-  void visit(TextNotEqualsExpr a) throws XPathException;
+    void visit(TextNotEqualsExpr a) throws XPathException;
 
-  void visit(PositionEqualsExpr a) throws XPathException;
+    void visit(PositionEqualsExpr a) throws XPathException;
 }

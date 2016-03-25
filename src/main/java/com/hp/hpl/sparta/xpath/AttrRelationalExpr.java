@@ -18,20 +18,20 @@ package com.hp.hpl.sparta.xpath;
  */
 public abstract class AttrRelationalExpr extends AttrExpr {
 
-  AttrRelationalExpr(String attrName, int attrValue) {
-    super(attrName);
-    attrValue_ = attrValue;
-  }
+    AttrRelationalExpr(String attrName, int attrValue) {
+        super(attrName);
+        attrValue_ = attrValue;
+    }
 
-  public double getAttrValue() {
-    return attrValue_;
-  }
+    public double getAttrValue() {
+        return attrValue_;
+    }
 
-  protected String toString(String op) {
-    return "[" + super.toString() + op + "\'" + attrValue_ + "\']";
-  }
+    protected String toString(String op) {
+        return "[" + super.toString() + op + "\'" + attrValue_ + "\']";
+    }
 
-  private final int attrValue_;
+    private final int attrValue_;
 
 }
 

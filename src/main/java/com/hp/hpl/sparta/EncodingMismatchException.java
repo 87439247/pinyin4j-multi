@@ -20,18 +20,18 @@ package com.hp.hpl.sparta;
 
 public class EncodingMismatchException extends ParseException {
 
-  EncodingMismatchException(String systemId, String declaredEncoding, String assumedEncoding) {
-    super(systemId, 0, declaredEncoding.charAt(declaredEncoding.length() - 1), declaredEncoding,
-        "encoding \'" + declaredEncoding + "\' declared instead of of " + assumedEncoding
-            + " as expected");
-    declaredEncoding_ = declaredEncoding;
-  }
+    EncodingMismatchException(String systemId, String declaredEncoding, String assumedEncoding) {
+        super(systemId, 0, declaredEncoding.charAt(declaredEncoding.length() - 1),
+                declaredEncoding, "encoding \'" + declaredEncoding + "\' declared instead of of "
+                        + assumedEncoding + " as expected");
+        declaredEncoding_ = declaredEncoding;
+    }
 
-  String getDeclaredEncoding() {
-    return declaredEncoding_;
-  }
+    String getDeclaredEncoding() {
+        return declaredEncoding_;
+    }
 
-  private String declaredEncoding_;
+    private String declaredEncoding_;
 
 }
 

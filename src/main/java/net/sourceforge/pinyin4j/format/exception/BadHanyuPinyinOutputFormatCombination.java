@@ -25,18 +25,18 @@ package net.sourceforge.pinyin4j.format.exception;
  * 
  */
 public class BadHanyuPinyinOutputFormatCombination extends Exception {
-  /**
-   * Constructor
-   * 
-   * @param message
-   *            the exception message
-   */
-  public BadHanyuPinyinOutputFormatCombination(String message) {
-    super(message);
-  }
+    /**
+     * Constructor
+     * 
+     * @param message
+     *            the exception message
+     */
+    public BadHanyuPinyinOutputFormatCombination(String message) {
+        super(message);
+    }
 
-  /**
-   * Automatically generated ID
-   */
-  private static final long serialVersionUID = -8500822088036526862L;
+    /**
+     * Automatically generated ID
+     */
+    private static final long serialVersionUID = -8500822088036526862L;
 }

@@ -25,377 +25,381 @@ import com.hp.hpl.sparta.xpath.*;
  */
 public class Document extends Node {
 
-  static private final boolean DEBUG = false;
+    static private final boolean DEBUG = false;
 
-  Document(String systemId) {
-    systemId_ = systemId;
-  }
-
-  /**
-   * Create new empty in-memory Document with a null documentElement.
-   */
-  public Document() {
-    systemId_ = "MEMORY";
-  }
-
-  /** Deep copy of this document. Any annotation is not copied. */
-  public Object clone() {
-    Document copy = new Document(systemId_);
-    copy.rootElement_ = (Element) rootElement_.clone();
-    return copy;
-  }
-
-  /**
-   * @return the filename, URL, or other ID by which this document is known.
-   * Initialized to "MEMORY" for Document created with default constructor.
-   */
-  public String getSystemId() {
-    return systemId_;
-  }
-
-  /**
-   * @param systemId the filename, URL, or other ID by which this document is known.
-   */
-  public void setSystemId(String systemId) {
-    systemId_ = systemId;
-    notifyObservers();
-  }
-
-  /** Same as {@link #getSystemId  getSystemId} */
-  public String toString() {
-    return systemId_;
-  }
-
-  /**
-   * @return root element of this DOM tree.
-   */
-  public Element getDocumentElement() {
-    return rootElement_;
-  }
-
-  /**
-   * Set the root element of this DOM tree.
-   */
-  public void setDocumentElement(Element rootElement) {
-    rootElement_ = rootElement;
-    rootElement_.setOwnerDocument(this);
-    notifyObservers();
-  }
-
-  private XPathVisitor visitor(String xpath, boolean expectStringValue) throws XPathException //, IOException
-  {
-    if (xpath.charAt(0) != '/') xpath = "/" + xpath;
-    return visitor(XPath.get(xpath), expectStringValue);
-  }
-
-  XPathVisitor visitor(XPath parseTree, boolean expectStringValue) throws XPathException {
-    if (parseTree.isStringValue() != expectStringValue) {
-      String msg =
-          expectStringValue ? "evaluates to element not string" : "evaluates to string not element";
-      throw new XPathException(parseTree, "\"" + parseTree + "\" evaluates to " + msg);
-    }
-    return new XPathVisitor(this, parseTree);
-  }
-
-  /** Select all the elements that match the absolute XPath
-      expression in this document. */
-  public Enumeration xpathSelectElements(String xpath) throws ParseException //, IOException
-  {
-    try {
-
-      if (xpath.charAt(0) != '/') xpath = "/" + xpath;
-      XPath parseTree = XPath.get(xpath);
-      monitor(parseTree);
-      return visitor(parseTree, false).getResultEnumeration();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  static private final Integer ONE = new Integer(1);
-
-  void monitor(XPath parseTree) throws XPathException {
-    if (DEBUG) {
-      String indexingAttr = parseTree.getIndexingAttrNameOfEquals();
-      if (indexingAttr != null) {
-        String xpath = parseTree.toString();
-        String prefix = xpath.substring(0, xpath.lastIndexOf('='));
-        Integer count = (Integer) indexible_.get(prefix);
-        if (count == null)
-          count = ONE;
-        else
-          count = new Integer(count.intValue() + 1);
-        indexible_.put(prefix, count);
-        if (count.intValue() > 100)
-          System.out.println("COULD-BE-INDEXED: " + xpath + " used " + count + " times in " + this);
-      }
-    }
-  }
-
-  /** Select all the strings that match the absolute XPath
-      expression in this document. */
-  public Enumeration xpathSelectStrings(String xpath) throws ParseException {
-    try {
-
-      return visitor(xpath, true).getResultEnumeration();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Select the first element that matches the absolute XPath
-      expression in this document, or null if
-      there is no match. */
-  public Element xpathSelectElement(String xpath) throws ParseException {
-    try {
-
-      if (xpath.charAt(0) != '/') xpath = "/" + xpath;
-      XPath parseTree = XPath.get(xpath);
-      monitor(parseTree);
-      return visitor(parseTree, false).getFirstResultElement();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Select the first element that matches the absolute XPath
-      expression in this document, or null if
-      there is no match. */
-  public String xpathSelectString(String xpath) throws ParseException {
-    try {
-
-      return visitor(xpath, true).getFirstResultString();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Just like Element.xpathEnsure, but also handles case of no documentElement.
-   */
-  public boolean xpathEnsure(String xpath) throws ParseException {
-    try {
-
-      //Quick exit for common case
-      if (xpathSelectElement(xpath) != null) return false;
-
-      //Split XPath into dirst step and bit relative to rootElement
-      final XPath parseTree = XPath.get(xpath);
-      int stepCount = 0;
-      for (Enumeration i = parseTree.getSteps(); i.hasMoreElements();) {
-        i.nextElement();
-        ++stepCount;
-      }
-      Enumeration i = parseTree.getSteps();
-      Step firstStep = (Step) i.nextElement();
-      Step[] rootElemSteps = new Step[stepCount - 1];
-      for (int j = 0; j < rootElemSteps.length; ++j)
-        rootElemSteps[j] = (Step) i.nextElement();
-
-      //Create root element if necessary
-      if (rootElement_ == null) {
-        Element newRoot = makeMatching(null, firstStep, xpath);
-        setDocumentElement(newRoot);
-      } else {
-        Element expectedRoot = xpathSelectElement("/" + firstStep);
-        if (expectedRoot == null)
-          throw new ParseException("Existing root element <" + rootElement_.getTagName()
-              + "...> does not match first step \"" + firstStep + "\" of \"" + xpath);
-      }
-
-      if (rootElemSteps.length == 0)
-        return true;
-      else
-        return rootElement_.xpathEnsure(XPath.get(false, rootElemSteps).toString());
-
-    } catch (XPathException e) {
-      throw new ParseException(xpath, e);
-    }
-  }
-
-  /** @see Document#xpathGetIndex(String) */
-  public class Index implements Observer {
-
-    Index(XPath xpath) throws XPathException {
-      attrName_ = xpath.getIndexingAttrName();
-      xpath_ = xpath;
-      addObserver(this);
+    Document(String systemId) {
+        systemId_ = systemId;
     }
 
     /**
-     * @param a value of the indexing attribute
-     * @return enumeration of Elements
-     * @throws ParseException when XPath that created this Index is malformed.
+     * Create new empty in-memory Document with a null documentElement.
      */
-    public synchronized Enumeration get(String attrValue) throws ParseException {
-      if (dict_ == null) regenerate();
-      Vector elemList = (Vector) dict_.get(attrValue);
-      return elemList == null ? EMPTY : elemList.elements();
+    public Document() {
+        systemId_ = "MEMORY";
+    }
+
+    /** Deep copy of this document. Any annotation is not copied. */
+    public Object clone() {
+        Document copy = new Document(systemId_);
+        copy.rootElement_ = (Element) rootElement_.clone();
+        return copy;
     }
 
     /**
-     * @return number of elements returned by {@link #get(String) get}
-     * @throws ParseException
+     * @return the filename, URL, or other ID by which this document is known.
+     * Initialized to "MEMORY" for Document created with default constructor.
      */
-    public synchronized int size() throws ParseException {
-      if (dict_ == null) regenerate();
-      return dict_.size();
+    public String getSystemId() {
+        return systemId_;
     }
 
     /**
-     * @see com.hp.hpl.sparta.Document.Observer#update(Document)
+     * @param systemId the filename, URL, or other ID by which this document is known.
      */
-    public synchronized void update(Document doc) {
-      dict_ = null; //force index to be regenerated on next get()
+    public void setSystemId(String systemId) {
+        systemId_ = systemId;
+        notifyObservers();
     }
 
-    private void regenerate() throws ParseException {
-      try {
+    /** Same as {@link #getSystemId  getSystemId} */
+    public String toString() {
+        return systemId_;
+    }
 
-        dict_ = Sparta.newCache();
-        for (Enumeration i = visitor(xpath_, false).getResultEnumeration(); i.hasMoreElements();) {
-          Element elem = (Element) i.nextElement();
-          String attrValue = elem.getAttribute(attrName_);
-          Vector elemList = (Vector) dict_.get(attrValue);
-          if (elemList == null) {
-            elemList = new Vector(1);
-            dict_.put(attrValue, elemList);
-          }
-          elemList.addElement(elem);
+    /**
+     * @return root element of this DOM tree.
+     */
+    public Element getDocumentElement() {
+        return rootElement_;
+    }
+
+    /**
+     * Set the root element of this DOM tree.
+     */
+    public void setDocumentElement(Element rootElement) {
+        rootElement_ = rootElement;
+        rootElement_.setOwnerDocument(this);
+        notifyObservers();
+    }
+
+    private XPathVisitor visitor(String xpath, boolean expectStringValue) throws XPathException //, IOException
+    {
+        if (xpath.charAt(0) != '/') xpath = "/" + xpath;
+        return visitor(XPath.get(xpath), expectStringValue);
+    }
+
+    XPathVisitor visitor(XPath parseTree, boolean expectStringValue) throws XPathException {
+        if (parseTree.isStringValue() != expectStringValue) {
+            String msg =
+                    expectStringValue
+                            ? "evaluates to element not string"
+                            : "evaluates to string not element";
+            throw new XPathException(parseTree, "\"" + parseTree + "\" evaluates to " + msg);
+        }
+        return new XPathVisitor(this, parseTree);
+    }
+
+    /** Select all the elements that match the absolute XPath
+        expression in this document. */
+    public Enumeration xpathSelectElements(String xpath) throws ParseException //, IOException
+    {
+        try {
+
+            if (xpath.charAt(0) != '/') xpath = "/" + xpath;
+            XPath parseTree = XPath.get(xpath);
+            monitor(parseTree);
+            return visitor(parseTree, false).getResultEnumeration();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    static private final Integer ONE = new Integer(1);
+
+    void monitor(XPath parseTree) throws XPathException {
+        if (DEBUG) {
+            String indexingAttr = parseTree.getIndexingAttrNameOfEquals();
+            if (indexingAttr != null) {
+                String xpath = parseTree.toString();
+                String prefix = xpath.substring(0, xpath.lastIndexOf('='));
+                Integer count = (Integer) indexible_.get(prefix);
+                if (count == null)
+                    count = ONE;
+                else
+                    count = new Integer(count.intValue() + 1);
+                indexible_.put(prefix, count);
+                if (count.intValue() > 100)
+                    System.out.println("COULD-BE-INDEXED: " + xpath + " used " + count
+                            + " times in " + this);
+            }
+        }
+    }
+
+    /** Select all the strings that match the absolute XPath
+        expression in this document. */
+    public Enumeration xpathSelectStrings(String xpath) throws ParseException {
+        try {
+
+            return visitor(xpath, true).getResultEnumeration();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Select the first element that matches the absolute XPath
+        expression in this document, or null if
+        there is no match. */
+    public Element xpathSelectElement(String xpath) throws ParseException {
+        try {
+
+            if (xpath.charAt(0) != '/') xpath = "/" + xpath;
+            XPath parseTree = XPath.get(xpath);
+            monitor(parseTree);
+            return visitor(parseTree, false).getFirstResultElement();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Select the first element that matches the absolute XPath
+        expression in this document, or null if
+        there is no match. */
+    public String xpathSelectString(String xpath) throws ParseException {
+        try {
+
+            return visitor(xpath, true).getFirstResultString();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Just like Element.xpathEnsure, but also handles case of no documentElement.
+     */
+    public boolean xpathEnsure(String xpath) throws ParseException {
+        try {
+
+            //Quick exit for common case
+            if (xpathSelectElement(xpath) != null) return false;
+
+            //Split XPath into dirst step and bit relative to rootElement
+            final XPath parseTree = XPath.get(xpath);
+            int stepCount = 0;
+            for (Enumeration i = parseTree.getSteps(); i.hasMoreElements();) {
+                i.nextElement();
+                ++stepCount;
+            }
+            Enumeration i = parseTree.getSteps();
+            Step firstStep = (Step) i.nextElement();
+            Step[] rootElemSteps = new Step[stepCount - 1];
+            for (int j = 0; j < rootElemSteps.length; ++j)
+                rootElemSteps[j] = (Step) i.nextElement();
+
+            //Create root element if necessary
+            if (rootElement_ == null) {
+                Element newRoot = makeMatching(null, firstStep, xpath);
+                setDocumentElement(newRoot);
+            } else {
+                Element expectedRoot = xpathSelectElement("/" + firstStep);
+                if (expectedRoot == null)
+                    throw new ParseException("Existing root element <" + rootElement_.getTagName()
+                            + "...> does not match first step \"" + firstStep + "\" of \"" + xpath);
+            }
+
+            if (rootElemSteps.length == 0)
+                return true;
+            else
+                return rootElement_.xpathEnsure(XPath.get(false, rootElemSteps).toString());
+
+        } catch (XPathException e) {
+            throw new ParseException(xpath, e);
+        }
+    }
+
+    /** @see Document#xpathGetIndex(String) */
+    public class Index implements Observer {
+
+        Index(XPath xpath) throws XPathException {
+            attrName_ = xpath.getIndexingAttrName();
+            xpath_ = xpath;
+            addObserver(this);
         }
 
-      } catch (XPathException e) {
-        throw new ParseException("XPath problem", e);
-      }
+        /**
+         * @param a value of the indexing attribute
+         * @return enumeration of Elements
+         * @throws ParseException when XPath that created this Index is malformed.
+         */
+        public synchronized Enumeration get(String attrValue) throws ParseException {
+            if (dict_ == null) regenerate();
+            Vector elemList = (Vector) dict_.get(attrValue);
+            return elemList == null ? EMPTY : elemList.elements();
+        }
+
+        /**
+         * @return number of elements returned by {@link #get(String) get}
+         * @throws ParseException
+         */
+        public synchronized int size() throws ParseException {
+            if (dict_ == null) regenerate();
+            return dict_.size();
+        }
+
+        /**
+         * @see com.hp.hpl.sparta.Document.Observer#update(Document)
+         */
+        public synchronized void update(Document doc) {
+            dict_ = null; //force index to be regenerated on next get()
+        }
+
+        private void regenerate() throws ParseException {
+            try {
+
+                dict_ = Sparta.newCache();
+                for (Enumeration i = visitor(xpath_, false).getResultEnumeration(); i
+                        .hasMoreElements();) {
+                    Element elem = (Element) i.nextElement();
+                    String attrValue = elem.getAttribute(attrName_);
+                    Vector elemList = (Vector) dict_.get(attrValue);
+                    if (elemList == null) {
+                        elemList = new Vector(1);
+                        dict_.put(attrValue, elemList);
+                    }
+                    elemList.addElement(elem);
+                }
+
+            } catch (XPathException e) {
+                throw new ParseException("XPath problem", e);
+            }
+        }
+
+        private transient Sparta.Cache dict_ = null;
+        private final XPath xpath_;
+        private final String attrName_;
     }
 
-    private transient Sparta.Cache dict_ = null;
-    private final XPath xpath_;
-    private final String attrName_;
-  }
+    static final Enumeration EMPTY = new EmptyEnumeration();
 
-  static final Enumeration EMPTY = new EmptyEnumeration();
-
-  /**
-   * @see #xpathGetIndex
-   * @return whether an index existst for this xpath
-   */
-  public boolean xpathHasIndex(String xpath) {
-    return indices_.get(xpath) != null;
-  }
-
-  /**
-   * For faster lookup by XPath return (creating if necessary) an
-   * index.  The xpath should be of the form "xp[@attrName]" where
-   * xp is an xpath, not ending in a "[...]" predicate, that returns
-   * a list of elements.  Doing a get("foo") on the index is
-   * equivalent to doing an
-   * xpathSelectElement("xp[@attrName='foo']") on the document
-   * except that it is faster ( O(1) as apposed to O(n) ).
-   * EXAMPLE:<PRE>
-   *   Enumeration leaders;
-   *   if( doc.xpathHasIndex( "/Team/Members[@firstName]" ){
-   *     //fast version
-   *     Document.Index index = doc.xpathGetIndex( "/Team/Members[@role]" );
-   *     leaders = index.get("leader");
-   *   }else
-   *     //slow version
-   *     leaders = doc.xpathSelectElement( "/Team/Members[@role='leader']" );
-   *</PRE>
-   *
-   * */
-  public Index xpathGetIndex(String xpath) throws ParseException {
-    try {
-
-      Index index = (Index) indices_.get(xpath);
-      //TODO: cacnonicalize key (use XPath object as key)
-      if (index == null) {
-        XPath xp = XPath.get(xpath);
-        index = new Index(xp);
-        indices_.put(xpath, index);
-      }
-      return index;
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
+    /**
+     * @see #xpathGetIndex
+     * @return whether an index existst for this xpath
+     */
+    public boolean xpathHasIndex(String xpath) {
+        return indices_.get(xpath) != null;
     }
-  }
 
-  /*public void removeIndices() {
-      indices_.clear();
-  }*/
+    /**
+     * For faster lookup by XPath return (creating if necessary) an
+     * index.  The xpath should be of the form "xp[@attrName]" where
+     * xp is an xpath, not ending in a "[...]" predicate, that returns
+     * a list of elements.  Doing a get("foo") on the index is
+     * equivalent to doing an
+     * xpathSelectElement("xp[@attrName='foo']") on the document
+     * except that it is faster ( O(1) as apposed to O(n) ).
+     * EXAMPLE:<PRE>
+     *   Enumeration leaders;
+     *   if( doc.xpathHasIndex( "/Team/Members[@firstName]" ){
+     *     //fast version
+     *     Document.Index index = doc.xpathGetIndex( "/Team/Members[@role]" );
+     *     leaders = index.get("leader");
+     *   }else
+     *     //slow version
+     *     leaders = doc.xpathSelectElement( "/Team/Members[@role='leader']" );
+     *</PRE>
+     *
+     * */
+    public Index xpathGetIndex(String xpath) throws ParseException {
+        try {
 
-  /** Something that is informed whenever the document changes. */
-  public interface Observer {
-    /** Called when the document changes. */
-    void update(Document doc);
-  }
+            Index index = (Index) indices_.get(xpath);
+            //TODO: cacnonicalize key (use XPath object as key)
+            if (index == null) {
+                XPath xp = XPath.get(xpath);
+                index = new Index(xp);
+                indices_.put(xpath, index);
+            }
+            return index;
 
-  public void addObserver(Observer observer) {
-    observers_.addElement(observer);
-  }
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
 
-  public void deleteObserver(Observer observer) {
-    observers_.removeElement(observer);
-  }
+    /*public void removeIndices() {
+        indices_.clear();
+    }*/
 
-  /** Accumulate text nodes hierarchically. */
-  public void toString(Writer writer) throws IOException {
-    rootElement_.toString(writer);
-  }
+    /** Something that is informed whenever the document changes. */
+    public interface Observer {
+        /** Called when the document changes. */
+        void update(Document doc);
+    }
 
-  void notifyObservers() {
-    for (Enumeration i = observers_.elements(); i.hasMoreElements();)
-      ((Observer) i.nextElement()).update(this);
-  }
+    public void addObserver(Observer observer) {
+        observers_.addElement(observer);
+    }
 
-  /**
-   * Write DOM to XML.
-   */
-  public void toXml(Writer writer) throws IOException {
-    writer.write("<?xml version=\"1.0\" ?>\n");
-    rootElement_.toXml(writer);
-  }
+    public void deleteObserver(Observer observer) {
+        observers_.removeElement(observer);
+    }
 
-  /** Two documents are equal IFF their document elements are equal. */
-  public boolean equals(Object thatO) {
+    /** Accumulate text nodes hierarchically. */
+    public void toString(Writer writer) throws IOException {
+        rootElement_.toString(writer);
+    }
 
-    //Do cheap tests first
-    if (this == thatO) return true;
-    if (!(thatO instanceof Document)) return false;
-    Document that = (Document) thatO;
-    return this.rootElement_.equals(that.rootElement_);
-  }
+    void notifyObservers() {
+        for (Enumeration i = observers_.elements(); i.hasMoreElements();)
+            ((Observer) i.nextElement()).update(this);
+    }
 
-  /** Called whenever cached version of hashCode needs to be regenerated. */
-  protected int computeHashCode() {
-    return rootElement_.hashCode();
-  }
+    /**
+     * Write DOM to XML.
+     */
+    public void toXml(Writer writer) throws IOException {
+        writer.write("<?xml version=\"1.0\" ?>\n");
+        rootElement_.toXml(writer);
+    }
 
-  /**
-   * @link aggregation
-   * @label documentElement
-   */
-  private Element rootElement_ = null;
-  private String systemId_;
-  private Sparta.Cache indices_ = Sparta.newCache();
-  private Vector observers_ = new Vector();
+    /** Two documents are equal IFF their document elements are equal. */
+    public boolean equals(Object thatO) {
 
-  private final Hashtable indexible_ = DEBUG ? new Hashtable() : null;
+        //Do cheap tests first
+        if (this == thatO) return true;
+        if (!(thatO instanceof Document)) return false;
+        Document that = (Document) thatO;
+        return this.rootElement_.equals(that.rootElement_);
+    }
+
+    /** Called whenever cached version of hashCode needs to be regenerated. */
+    protected int computeHashCode() {
+        return rootElement_.hashCode();
+    }
+
+    /**
+     * @link aggregation
+     * @label documentElement
+     */
+    private Element rootElement_ = null;
+    private String systemId_;
+    private Sparta.Cache indices_ = Sparta.newCache();
+    private Vector observers_ = new Vector();
+
+    private final Hashtable indexible_ = DEBUG ? new Hashtable() : null;
 }
 
 
 class EmptyEnumeration implements Enumeration {
-  public boolean hasMoreElements() {
-    return false;
-  }
+    public boolean hasMoreElements() {
+        return false;
+    }
 
-  public Object nextElement() {
-    throw new NoSuchElementException();
-  }
+    public Object nextElement() {
+        throw new NoSuchElementException();
+    }
 }
 
 // $Log: Document.java,v $

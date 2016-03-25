@@ -13,9 +13,9 @@
     <artifactId>pinyin4j-multi</artifactId>
     <version>1.0.0</version>
 
-    <name>Chinese to Pinyin</name>
+    <name>Chinese to Pinyin Multi Tone</name>
     <description>Support Chinese character (both Simplified and Tranditional) to most popular Pinyin systems, including Hanyu Pinyin, Tongyong Pinyin, Wade-Giles, MPS2, Yale and Gwoyeu Romatzyh. Support multiple pronounciations and customized output.</description>
-    <url>https://github.com/belerweb/pinyin4j</url>
+    <url>https://github.com/obiteaaron/pinyin4j-multi</url>
 
 
     <licenses>
@@ -27,13 +27,13 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/belerweb/pinyin4j.git</connection>
-        <developerConnection>scm:git:https://github.com/belerweb/pinyin4j.git</developerConnection>
-        <url>https://github.com/belerweb/pinyin4j.git</url>
+        <connection>scm:git@github.com:obiteaaron/pinyin4j-multi.git</connection>
+        <developerConnection>scm:git@github.com:obiteaaron/pinyin4j-multi.git</developerConnection>
+        <url>https://github.com/obiteaaron/pinyin4j-multi.git</url>
     </scm>
     <issueManagement>
         <system>Github Issue</system>
-        <url>https://github.com/belerweb/pinyin4j/issues</url>
+        <url>https://github.com/obiteaaron/pinyin4j-multi/issues</url>
     </issueManagement>
     <developers>
         <developer>

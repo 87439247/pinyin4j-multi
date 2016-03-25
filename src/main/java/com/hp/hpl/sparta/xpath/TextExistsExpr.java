@@ -22,21 +22,21 @@ package com.hp.hpl.sparta.xpath;
  */
 public class TextExistsExpr extends BooleanExpr {
 
-  //only need one of them => much memory sharing
-  private TextExistsExpr() {}
+    //only need one of them => much memory sharing
+    private TextExistsExpr() {}
 
-  static final TextExistsExpr INSTANCE = new TextExistsExpr();
+    static final TextExistsExpr INSTANCE = new TextExistsExpr();
 
-  /**
-   * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
-   */
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    /**
+     * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
+     */
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return "[text()]";
-  }
+    public String toString() {
+        return "[text()]";
+    }
 
 }
 

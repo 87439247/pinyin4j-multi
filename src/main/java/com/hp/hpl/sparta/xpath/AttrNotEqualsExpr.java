@@ -19,17 +19,17 @@ package com.hp.hpl.sparta.xpath;
  @author Eamonn O'Brien-Strain
  */
 public class AttrNotEqualsExpr extends AttrCompareExpr {
-  AttrNotEqualsExpr(String attrName, String attrValue) {
-    super(attrName, attrValue);
-  }
+    AttrNotEqualsExpr(String attrName, String attrValue) {
+        super(attrName, attrValue);
+    }
 
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return toString("!=");
-  }
+    public String toString() {
+        return toString("!=");
+    }
 
 }
 

@@ -18,20 +18,20 @@ package com.hp.hpl.sparta.xpath;
  @author Eamonn O'Brien-Strain
  */
 public class TextNotEqualsExpr extends TextCompareExpr {
-  TextNotEqualsExpr(String value) {
-    super(value);
-  }
+    TextNotEqualsExpr(String value) {
+        super(value);
+    }
 
-  /**
-   * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
-   */
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    /**
+     * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
+     */
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return toString("!=");
-  }
+    public String toString() {
+        return toString("!=");
+    }
 }
 
 //$Log: TextNotEqualsExpr.java,v $

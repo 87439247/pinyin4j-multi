@@ -19,17 +19,17 @@ package com.hp.hpl.sparta.xpath;
  */
 public class AttrExistsExpr extends AttrExpr {
 
-  AttrExistsExpr(String attrName) {
-    super(attrName);
-  }
+    AttrExistsExpr(String attrName) {
+        super(attrName);
+    }
 
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return "[" + super.toString() + "]";
-  }
+    public String toString() {
+        return "[" + super.toString() + "]";
+    }
 }
 
 // $Log: AttrExistsExpr.java,v $

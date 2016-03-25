@@ -23,23 +23,23 @@ package com.hp.hpl.sparta.xpath;
  */
 public class ThisNodeTest extends NodeTest {
 
-  //only need one of them => GoF Flyweight Pattern(195) 
-  private ThisNodeTest() {}
+    //only need one of them => GoF Flyweight Pattern(195) 
+    private ThisNodeTest() {}
 
-  static final ThisNodeTest INSTANCE = new ThisNodeTest();
+    static final ThisNodeTest INSTANCE = new ThisNodeTest();
 
-  public void accept(Visitor visitor) {
-    visitor.visit(this);
-  }
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-  /** Return false*/
-  public boolean isStringValue() {
-    return false;
-  }
+    /** Return false*/
+    public boolean isStringValue() {
+        return false;
+    }
 
-  public String toString() {
-    return ".";
-  }
+    public String toString() {
+        return ".";
+    }
 }
 
 // $Log: ThisNodeTest.java,v $

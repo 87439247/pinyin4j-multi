@@ -23,18 +23,18 @@ package com.hp.hpl.sparta.xpath;
  */
 public class TrueExpr extends BooleanExpr {
 
-  //only need one of them => much memory sharing
-  private TrueExpr() {}
+    //only need one of them => much memory sharing
+    private TrueExpr() {}
 
-  static final TrueExpr INSTANCE = new TrueExpr();
+    static final TrueExpr INSTANCE = new TrueExpr();
 
-  public void accept(BooleanExprVisitor visitor) {
-    visitor.visit(this);
-  }
+    public void accept(BooleanExprVisitor visitor) {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return "";
-  }
+    public String toString() {
+        return "";
+    }
 
 }
 

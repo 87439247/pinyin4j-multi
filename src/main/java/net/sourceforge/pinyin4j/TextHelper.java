@@ -23,20 +23,20 @@ package net.sourceforge.pinyin4j;
  */
 class TextHelper {
 
-  /**
-   * @param hanyuPinyinWithToneNumber
-   * @return Hanyu Pinyin string without tone number
-   */
-  static String extractToneNumber(String hanyuPinyinWithToneNumber) {
-    return hanyuPinyinWithToneNumber.substring(hanyuPinyinWithToneNumber.length() - 1);
-  }
+    /**
+     * @param hanyuPinyinWithToneNumber
+     * @return Hanyu Pinyin string without tone number
+     */
+    static String extractToneNumber(String hanyuPinyinWithToneNumber) {
+        return hanyuPinyinWithToneNumber.substring(hanyuPinyinWithToneNumber.length() - 1);
+    }
 
-  /**
-   * @param hanyuPinyinWithToneNumber
-   * @return only tone number
-   */
-  static String extractPinyinString(String hanyuPinyinWithToneNumber) {
-    return hanyuPinyinWithToneNumber.substring(0, hanyuPinyinWithToneNumber.length() - 1);
-  }
+    /**
+     * @param hanyuPinyinWithToneNumber
+     * @return only tone number
+     */
+    static String extractPinyinString(String hanyuPinyinWithToneNumber) {
+        return hanyuPinyinWithToneNumber.substring(0, hanyuPinyinWithToneNumber.length() - 1);
+    }
 
 }

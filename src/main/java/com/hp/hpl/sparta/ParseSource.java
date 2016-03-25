@@ -18,38 +18,38 @@ package com.hp.hpl.sparta;
  */
 public interface ParseSource {
 
-  String toString();
+    String toString();
 
-  String getSystemId();
+    String getSystemId();
 
-  /** Last line number read by parser. */
-  int getLineNumber();
+    /** Last line number read by parser. */
+    int getLineNumber();
 
-  ParseLog DEFAULT_LOG = new DefaultLog();
+    ParseLog DEFAULT_LOG = new DefaultLog();
 
-  /** The InputStream passed into the constructor must support mark with this
-   * amount of lookahead.
-   * new BufferedInputStream(in,ParseSource.MAXLOOKAHEAD)
-   */
-  static public final int MAXLOOKAHEAD = "<?xml version=\"1.0\" encoding=\"\"".length() + 40;
-  //Max charset name is 40 according to
-  //http://www.iana.org/assignments/character-sets
+    /** The InputStream passed into the constructor must support mark with this
+     * amount of lookahead.
+     * new BufferedInputStream(in,ParseSource.MAXLOOKAHEAD)
+     */
+    static public final int MAXLOOKAHEAD = "<?xml version=\"1.0\" encoding=\"\"".length() + 40;
+    //Max charset name is 40 according to
+    //http://www.iana.org/assignments/character-sets
 }
 
 
 class DefaultLog implements ParseLog {
 
-  public void error(String msg, String systemId, int line) {
-    System.err.println(systemId + "(" + line + "): " + msg + " (ERROR)");
-  }
+    public void error(String msg, String systemId, int line) {
+        System.err.println(systemId + "(" + line + "): " + msg + " (ERROR)");
+    }
 
-  public void warning(String msg, String systemId, int line) {
-    System.out.println(systemId + "(" + line + "): " + msg + " (WARNING)");
-  }
+    public void warning(String msg, String systemId, int line) {
+        System.out.println(systemId + "(" + line + "): " + msg + " (WARNING)");
+    }
 
-  public void note(String msg, String systemId, int line) {
-    System.out.println(systemId + "(" + line + "): " + msg + " (NOTE)");
-  }
+    public void note(String msg, String systemId, int line) {
+        System.out.println(systemId + "(" + line + "): " + msg + " (NOTE)");
+    }
 
 }
 

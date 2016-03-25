@@ -21,29 +21,29 @@ import com.hp.hpl.sparta.Sparta;
  */
 public class ElementTest extends NodeTest {
 
-  ElementTest(String tagName) {
-    tagName_ = Sparta.intern(tagName);
-  }
+    ElementTest(String tagName) {
+        tagName_ = Sparta.intern(tagName);
+    }
 
-  public void accept(Visitor visitor) {
-    visitor.visit(this);
-  }
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-  /** Return false*/
-  public boolean isStringValue() {
-    return false;
-  }
+    /** Return false*/
+    public boolean isStringValue() {
+        return false;
+    }
 
-  /** @return tag as interned string.*/
-  public String getTagName() {
-    return tagName_;
-  }
+    /** @return tag as interned string.*/
+    public String getTagName() {
+        return tagName_;
+    }
 
-  public String toString() {
-    return tagName_;
-  }
+    public String toString() {
+        return tagName_;
+    }
 
-  private final String tagName_;
+    private final String tagName_;
 }
 
 // $Log: ElementTest.java,v $

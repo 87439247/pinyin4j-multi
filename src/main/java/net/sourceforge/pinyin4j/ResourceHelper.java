@@ -24,12 +24,12 @@ import java.io.BufferedInputStream;
  * 
  */
 class ResourceHelper {
-  /**
-   * @param resourceName
-   * @return resource (mainly file in file system or file in compressed
-   *         package) as BufferedInputStream
-   */
-  static BufferedInputStream getResourceInputStream(String resourceName) {
-    return new BufferedInputStream(ResourceHelper.class.getResourceAsStream(resourceName));
-  }
+    /**
+     * @param resourceName
+     * @return resource (mainly file in file system or file in compressed
+     *         package) as BufferedInputStream
+     */
+    static BufferedInputStream getResourceInputStream(String resourceName) {
+        return new BufferedInputStream(ResourceHelper.class.getResourceAsStream(resourceName));
+    }
 }

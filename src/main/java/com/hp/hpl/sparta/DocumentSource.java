@@ -20,8 +20,8 @@ package com.hp.hpl.sparta;
 
 interface DocumentSource extends ParseSource {
 
-  /** The parsed document. */
-  Document getDocument();
+    /** The parsed document. */
+    Document getDocument();
 
 }
 

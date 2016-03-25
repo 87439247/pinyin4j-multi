@@ -24,424 +24,425 @@ import com.hp.hpl.sparta.xpath.*;
 
 public abstract class Node {
 
-  void notifyObservers() {
-    hash_ = 0; //clear hash_ cache
-    if (doc_ != null) doc_.notifyObservers();
-  }
-
-  void setOwnerDocument(Document doc) {
-    doc_ = doc;
-  }
-
-  /** The document that contains this node.  null IFF this is a Document */
-  public Document getOwnerDocument() {
-    return doc_;
-  }
-
-  /** The element that contains this node or null if this is a Document
-   * or the root element of a document. */
-  public Element getParentNode() {
-    return parentNode_;
-  }
-
-  /** Return the previous node in the parent's list of children, or null if no such node. */
-  public Node getPreviousSibling() {
-    return previousSibling_;
-  }
-
-  /** Return the next node in the parent's list of children, or null if no such node. */
-  public Node getNextSibling() {
-    return nextSibling_;
-  }
-
-  /** @see #setAnnotation */
-  public Object getAnnotation() {
-    return annotation_;
-  }
-
-  /** Use by client to attach arbitrary data to DOM document.
-   *  Does not update indices and other observers.
-   *  */
-  public void setAnnotation(Object annotation) {
-    annotation_ = annotation;
-  }
-
-  void setParentNode(Element parentNode) {
-    parentNode_ = parentNode;
-  }
-
-  void insertAtEndOfLinkedList(Node lastChild) {
-    previousSibling_ = lastChild;
-    if (lastChild != null) lastChild.nextSibling_ = this;
-  }
-
-  void removeFromLinkedList() {
-    if (previousSibling_ != null) previousSibling_.nextSibling_ = nextSibling_;
-    if (nextSibling_ != null) nextSibling_.previousSibling_ = previousSibling_;
-    nextSibling_ = null;
-    previousSibling_ = null;
-  }
-
-  void replaceInLinkedList(Node replacement) {
-    if (previousSibling_ != null) previousSibling_.nextSibling_ = replacement;
-    if (nextSibling_ != null) nextSibling_.previousSibling_ = replacement;
-    replacement.nextSibling_ = nextSibling_;
-    replacement.previousSibling_ = previousSibling_;
-    nextSibling_ = null;
-    previousSibling_ = null;
-  }
-
-  /** XML representation of this node. */
-  public String toXml() throws IOException {
-    //Cannot use StringWriter because not supported by J2ME
-    ByteArrayOutputStream o = new ByteArrayOutputStream();
-    Writer w = new OutputStreamWriter(o);
-    toXml(w);
-    w.flush();
-    return new String(o.toByteArray());
-  }
-
-  /** For an xpath expression of the form "xpathPrefix/@attrName" set the
-   *  attribute "attrName" to attrValue on all elements that match
-   *  "XpathPrefix" which is an arbitrary xpath expression matching elements,
-   *  or for an xpath expression of the form "xpathPrefixe/text()" set the
-   *  text of all matching text nodes.
-   *
-   (The following doc is used in the examples below.)<pre>
-  
-   <a>
-   <b x="ppp"/>
-   <b y="qqq"/>
-   <b/>
-   </a>
-  
-   </pre>
-   * <ul>
-   * <li>node.xpathSetStrings( "xpathPrefix/@attrName", value )
-   * is equivalent to<pre>
-   foreach element in node.xpathSelectElement(xpathPrefix):
-   element.setAttribute( "attrName", value );
-   </pre>
-   <li> doc.xpathSetStrings( "/a/b/@x", "rrr" )
-   will result in<pre>
-  
-   <a>
-   <b x="rrr"/>
-   <b x="rrr" y="qqq"/>
-   <b x="rrr"/>
-   </a>
-  
-   </pre>
-   (Every matching child gets its attribute set.)
-  
-   <li> To set only the first child you would have to do
-   doc.xpathSetStrings( "/a/b[@x]/@x", "rrr" )
-   which would result in:<pre>
-  
-   <a>
-   <b x="rrr"/>
-   <b y="qqq"/>
-   <b/>
-   </a>
-  
-   </pre>
-  
-   <li> Not matching calls silently do nothing.
-  
-   <li> doc.xpathSetStrings("/a/b/text()", "TTT" ) will result in:
-   <pre>
-  
-   <a>
-   <b x="ppp">TTT</b>
-   <b y="qqq">TTT</b>
-   <b>TTT</b>
-   </a>
-  
-   </pre>
-  
-   <li> doc.xpathSetStrings("/a/text()", "TTT" ) will result in:
-   <pre>
-  
-   <a>TTT<b x="ppp"/><b y="qqq"/><b/></a>
-  
-   </pre>
-   </ul>
-   @return true iff anything changed
-   */
-  public boolean xpathSetStrings(String xpath, String value) throws ParseException
-  //throws XPathException, IOException
-  {
-    //This is currently implemented using string manipulation.  It would
-    // be better to work on the XPath objects.
-    boolean changed = false;
-    try {
-      int slash = xpath.lastIndexOf('/');
-      if (!xpath.substring(slash + 1).equals("text()") && xpath.charAt(slash + 1) != '@')
-        throw new ParseException("Last step of Xpath expression \"" + xpath
-            + "\" is not \"text()\" and does not start with a '@'. It starts with a '"
-            + xpath.charAt(slash + 1) + "'");
-      String elemXPath = xpath.substring(0, slash);
-      if (xpath.charAt(slash + 1) == '@') {
-        String attrName = xpath.substring(slash + 2);
-        if (attrName.length() == 0)
-          throw new ParseException("Xpath expression \"" + xpath
-              + "\" specifies zero-length attribute name\"");
-        Enumeration i = xpathSelectElements(elemXPath);
-        while (i.hasMoreElements()) {
-          Element element = (Element) i.nextElement();
-          String oldValue = element.getAttribute(attrName);
-          if (!value.equals(oldValue)) {
-            element.setAttribute(attrName, value);
-            changed = true;
-          }
-        }
-      } else {
-        Enumeration i = xpathSelectElements(elemXPath);
-        changed = i.hasMoreElements();
-        while (i.hasMoreElements()) {
-          Element parentOfText = (Element) i.nextElement();
-
-          //Create a set of text nodes.  Need to do this
-          //because do not want to delete from what we are
-          //iterating over.
-
-          // change LinkedList to Vector to make the code work
-          // with PersonalJava.
-          // List textNodes = new LinkedList();
-          Vector textNodes = new Vector();
-          for (Node j = parentOfText.getFirstChild(); j != null; j = j.getNextSibling())
-            if (j instanceof Text) {
-              // textNodes.add((Text) j);
-              textNodes.addElement((Text) j);
-            }
-
-          if (textNodes.size() == 0) {
-
-            //If no existing text node add one
-            Text text = new Text(value);
-            if (text.getData().length() > 0) {
-              parentOfText.appendChild(text);
-              changed = true;
-            }
-
-          } else {
-
-            //Set value of first text node
-            // Text first = (Text) textNodes.remove(0);
-            Text first = (Text) textNodes.elementAt(0);
-            if (!first.getData().equals(value)) {
-              textNodes.removeElementAt(0);
-              first.setData(value);
-              changed = true;
-            }
-
-            //Remove all subsequent text nodes
-            // for (Iterator j = textNodes.iterator(); j.hasNext();) {
-            //     Text text = (Text) j.next();
-            for (int j = 0; j < textNodes.size(); j++) {
-              Text text = (Text) textNodes.elementAt(j);
-              parentOfText.removeChild(text);
-              changed = true;
-            }
-
-          }
-
-        }
-      }
-      return changed;
-
-    } catch (DOMException e) {
-      throw new Error("Assertion failed " + e);
-    } catch (IndexOutOfBoundsException e) {
-      throw new ParseException("Xpath expression \"" + xpath
-          + "\" is not in the form \"xpathExpression/@attributeName\"");
+    void notifyObservers() {
+        hash_ = 0; //clear hash_ cache
+        if (doc_ != null) doc_.notifyObservers();
     }
-  }
 
-  Element makeMatching(final Element parent, Step step, final String msgContext)
-      throws ParseException, XPathException {
-    NodeTest nodeTest = step.getNodeTest();
-    if (!(nodeTest instanceof ElementTest))
-      throw new ParseException("\"" + nodeTest + "\" in \"" + msgContext
-          + "\" is not an element test");
-    ElementTest elemTest = (ElementTest) nodeTest;
-    final String tagName = elemTest.getTagName();
-
-    final Element newChild = new Element(tagName);
-
-    BooleanExpr predicate = step.getPredicate();
-
-    predicate.accept(new BooleanExprVisitor() {
-      public void visit(TrueExpr a) {
-      //do nothing
-      }
-
-      public void visit(AttrExistsExpr a) throws XPathException {
-        newChild.setAttribute(a.getAttrName(), "something");
-      }
-
-      public void visit(AttrEqualsExpr a) throws XPathException {
-        newChild.setAttribute(a.getAttrName(), a.getAttrValue());
-      }
-
-      public void visit(AttrNotEqualsExpr a) throws XPathException {
-        newChild.setAttribute(a.getAttrName(), "not " + a.getAttrValue());
-      }
-
-      public void visit(AttrLessExpr a) throws XPathException {
-        newChild.setAttribute(a.getAttrName(), Long.toString(Long.MIN_VALUE));
-      }
-
-      public void visit(AttrGreaterExpr a) throws XPathException {
-        newChild.setAttribute(a.getAttrName(), Long.toString(Long.MAX_VALUE));
-      }
-
-      public void visit(TextExistsExpr a) throws XPathException {
-        newChild.appendChild(new Text("something"));
-      }
-
-      public void visit(TextEqualsExpr a) throws XPathException {
-        newChild.appendChild(new Text(a.getValue()));
-      }
-
-      public void visit(TextNotEqualsExpr a) throws XPathException {
-        newChild.appendChild(new Text("not " + a.getValue()));
-      }
-
-      public void visit(PositionEqualsExpr a) throws XPathException {
-        int posn = a.getPosition();
-        if (parent == null && posn != 1)
-          throw new XPathException(XPath.get(msgContext), "Position of root node must be 1");
-        int lastPosition = 1; //newChild is at position 1
-        while (lastPosition < posn) {
-          parent.appendChild(new Element(tagName));
-          ++lastPosition;
-        }
-
-      }
-    });
-    return newChild;
-  }
-
-  /** Select all the elements that match the relative XPath
-      expression with respect to this node. */
-  public abstract Enumeration xpathSelectElements(String xpath) throws ParseException;
-
-  //throws XPathException, IOException;
-
-  /** Select all the strings that match the relative XPath
-      expression with respect to this node. */
-  public abstract Enumeration xpathSelectStrings(String xpath) throws ParseException;
-
-  //throws XPathException, IOException;
-
-  /** Select the first element that matches the relative XPath
-      expression with respect to this node, or null if
-      there is no match.*/
-  public abstract Element xpathSelectElement(String xpath) throws ParseException;
-
-  /** Select the first element that matches the relative XPath
-      expression with respect to this node, or null if
-      there is no match. */
-  public abstract String xpathSelectString(String xpath) throws ParseException;
-
-  abstract public Object clone();
-
-  //public abstract Node cloneNode(Document doc) throws DOMException;
-
-  /** Hierarchically concatenated text nodes.*/
-  public String toString() {
-    try {
-      //Cannot use StringWriter because not supported by J2ME
-      ByteArrayOutputStream o = new ByteArrayOutputStream();
-      Writer w = new OutputStreamWriter(o);
-      toString(w);
-      w.flush();
-      return new String(o.toByteArray());
-    } catch (IOException e) {
-      return super.toString();
+    void setOwnerDocument(Document doc) {
+        doc_ = doc;
     }
-  }
 
-  abstract void toString(Writer writer) throws IOException;
-
-  abstract void toXml(Writer writer) throws IOException;
-
-  /** Quote special XML characters '<', '>', '&', '"' if necessary,
-   *  and write to character stream.  We write to a character stream
-   *  rather than simply returning a stream to avoid creating
-   *  unneccessary objects.*/
-  static protected void htmlEncode(Writer writer, String string) throws IOException {
-    int n = string.length();
-    int writeNext = 0;
-    for (int i = 0; i < n; ++i) {
-      int ch = string.charAt(i);
-      String encoded;
-      if (ch >= 128)
-        encoded = "&#" + ch + ";";
-      else
-        switch (ch) {
-          case '<':
-            encoded = "&lt;";
-            break;
-          case '>':
-            encoded = "&gt;";
-            break;
-          case '&':
-            encoded = "&amp;";
-            break;
-          case '\"':
-            encoded = "&quot;";
-            break;
-          case '\'':
-            encoded = "&#39;";
-            break;
-          default:
-            encoded = null;
-            break;
-        }
-      if (encoded != null) {
-        writer.write(string, writeNext, i - writeNext);
-        writer.write(encoded);
-        writeNext = i + 1;
-      }
+    /** The document that contains this node.  null IFF this is a Document */
+    public Document getOwnerDocument() {
+        return doc_;
     }
-    if (writeNext < n) writer.write(string, writeNext, n - writeNext);
-  }
 
-  /** Called whenever cached version of hashCode needs to be regenerated. */
-  abstract protected int computeHashCode();
+    /** The element that contains this node or null if this is a Document
+     * or the root element of a document. */
+    public Element getParentNode() {
+        return parentNode_;
+    }
 
-  /* 
-   * @see java.lang.Object#hashCode()
-   */
-  public int hashCode() {
-    if (hash_ == 0) hash_ = computeHashCode();
-    return hash_;
-  }
+    /** Return the previous node in the parent's list of children, or null if no such node. */
+    public Node getPreviousSibling() {
+        return previousSibling_;
+    }
 
-  /**
-   * @label ownerDocument
-   */
-  private Document doc_ = null;
+    /** Return the next node in the parent's list of children, or null if no such node. */
+    public Node getNextSibling() {
+        return nextSibling_;
+    }
 
-  /**
-   * @label parent
-   */
-  private Element parentNode_ = null;
+    /** @see #setAnnotation */
+    public Object getAnnotation() {
+        return annotation_;
+    }
 
-  /**
-   * @label previousSibling
-   */
-  private Node previousSibling_ = null;
+    /** Use by client to attach arbitrary data to DOM document.
+     *  Does not update indices and other observers.
+     *  */
+    public void setAnnotation(Object annotation) {
+        annotation_ = annotation;
+    }
 
-  /**
-   * @label nextSibling
-   */
-  private Node nextSibling_ = null;
-  private Object annotation_ = null;
+    void setParentNode(Element parentNode) {
+        parentNode_ = parentNode;
+    }
 
-  private int hash_ = 0;
+    void insertAtEndOfLinkedList(Node lastChild) {
+        previousSibling_ = lastChild;
+        if (lastChild != null) lastChild.nextSibling_ = this;
+    }
+
+    void removeFromLinkedList() {
+        if (previousSibling_ != null) previousSibling_.nextSibling_ = nextSibling_;
+        if (nextSibling_ != null) nextSibling_.previousSibling_ = previousSibling_;
+        nextSibling_ = null;
+        previousSibling_ = null;
+    }
+
+    void replaceInLinkedList(Node replacement) {
+        if (previousSibling_ != null) previousSibling_.nextSibling_ = replacement;
+        if (nextSibling_ != null) nextSibling_.previousSibling_ = replacement;
+        replacement.nextSibling_ = nextSibling_;
+        replacement.previousSibling_ = previousSibling_;
+        nextSibling_ = null;
+        previousSibling_ = null;
+    }
+
+    /** XML representation of this node. */
+    public String toXml() throws IOException {
+        //Cannot use StringWriter because not supported by J2ME
+        ByteArrayOutputStream o = new ByteArrayOutputStream();
+        Writer w = new OutputStreamWriter(o);
+        toXml(w);
+        w.flush();
+        return new String(o.toByteArray());
+    }
+
+    /** For an xpath expression of the form "xpathPrefix/@attrName" set the
+     *  attribute "attrName" to attrValue on all elements that match
+     *  "XpathPrefix" which is an arbitrary xpath expression matching elements,
+     *  or for an xpath expression of the form "xpathPrefixe/text()" set the
+     *  text of all matching text nodes.
+     *
+     (The following doc is used in the examples below.)<pre>
+    
+     <a>
+     <b x="ppp"/>
+     <b y="qqq"/>
+     <b/>
+     </a>
+    
+     </pre>
+     * <ul>
+     * <li>node.xpathSetStrings( "xpathPrefix/@attrName", value )
+     * is equivalent to<pre>
+     foreach element in node.xpathSelectElement(xpathPrefix):
+     element.setAttribute( "attrName", value );
+     </pre>
+     <li> doc.xpathSetStrings( "/a/b/@x", "rrr" )
+     will result in<pre>
+    
+     <a>
+     <b x="rrr"/>
+     <b x="rrr" y="qqq"/>
+     <b x="rrr"/>
+     </a>
+    
+     </pre>
+     (Every matching child gets its attribute set.)
+    
+     <li> To set only the first child you would have to do
+     doc.xpathSetStrings( "/a/b[@x]/@x", "rrr" )
+     which would result in:<pre>
+    
+     <a>
+     <b x="rrr"/>
+     <b y="qqq"/>
+     <b/>
+     </a>
+    
+     </pre>
+    
+     <li> Not matching calls silently do nothing.
+    
+     <li> doc.xpathSetStrings("/a/b/text()", "TTT" ) will result in:
+     <pre>
+    
+     <a>
+     <b x="ppp">TTT</b>
+     <b y="qqq">TTT</b>
+     <b>TTT</b>
+     </a>
+    
+     </pre>
+    
+     <li> doc.xpathSetStrings("/a/text()", "TTT" ) will result in:
+     <pre>
+    
+     <a>TTT<b x="ppp"/><b y="qqq"/><b/></a>
+    
+     </pre>
+     </ul>
+     @return true iff anything changed
+     */
+    public boolean xpathSetStrings(String xpath, String value) throws ParseException
+    //throws XPathException, IOException
+    {
+        //This is currently implemented using string manipulation.  It would
+        // be better to work on the XPath objects.
+        boolean changed = false;
+        try {
+            int slash = xpath.lastIndexOf('/');
+            if (!xpath.substring(slash + 1).equals("text()") && xpath.charAt(slash + 1) != '@')
+                throw new ParseException("Last step of Xpath expression \"" + xpath
+                        + "\" is not \"text()\" and does not start with a '@'. It starts with a '"
+                        + xpath.charAt(slash + 1) + "'");
+            String elemXPath = xpath.substring(0, slash);
+            if (xpath.charAt(slash + 1) == '@') {
+                String attrName = xpath.substring(slash + 2);
+                if (attrName.length() == 0)
+                    throw new ParseException("Xpath expression \"" + xpath
+                            + "\" specifies zero-length attribute name\"");
+                Enumeration i = xpathSelectElements(elemXPath);
+                while (i.hasMoreElements()) {
+                    Element element = (Element) i.nextElement();
+                    String oldValue = element.getAttribute(attrName);
+                    if (!value.equals(oldValue)) {
+                        element.setAttribute(attrName, value);
+                        changed = true;
+                    }
+                }
+            } else {
+                Enumeration i = xpathSelectElements(elemXPath);
+                changed = i.hasMoreElements();
+                while (i.hasMoreElements()) {
+                    Element parentOfText = (Element) i.nextElement();
+
+                    //Create a set of text nodes.  Need to do this
+                    //because do not want to delete from what we are
+                    //iterating over.
+
+                    // change LinkedList to Vector to make the code work
+                    // with PersonalJava.
+                    // List textNodes = new LinkedList();
+                    Vector textNodes = new Vector();
+                    for (Node j = parentOfText.getFirstChild(); j != null; j = j.getNextSibling())
+                        if (j instanceof Text) {
+                            // textNodes.add((Text) j);
+                            textNodes.addElement((Text) j);
+                        }
+
+                    if (textNodes.size() == 0) {
+
+                        //If no existing text node add one
+                        Text text = new Text(value);
+                        if (text.getData().length() > 0) {
+                            parentOfText.appendChild(text);
+                            changed = true;
+                        }
+
+                    } else {
+
+                        //Set value of first text node
+                        // Text first = (Text) textNodes.remove(0);
+                        Text first = (Text) textNodes.elementAt(0);
+                        if (!first.getData().equals(value)) {
+                            textNodes.removeElementAt(0);
+                            first.setData(value);
+                            changed = true;
+                        }
+
+                        //Remove all subsequent text nodes
+                        // for (Iterator j = textNodes.iterator(); j.hasNext();) {
+                        //     Text text = (Text) j.next();
+                        for (int j = 0; j < textNodes.size(); j++) {
+                            Text text = (Text) textNodes.elementAt(j);
+                            parentOfText.removeChild(text);
+                            changed = true;
+                        }
+
+                    }
+
+                }
+            }
+            return changed;
+
+        } catch (DOMException e) {
+            throw new Error("Assertion failed " + e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new ParseException("Xpath expression \"" + xpath
+                    + "\" is not in the form \"xpathExpression/@attributeName\"");
+        }
+    }
+
+    Element makeMatching(final Element parent, Step step, final String msgContext)
+            throws ParseException, XPathException {
+        NodeTest nodeTest = step.getNodeTest();
+        if (!(nodeTest instanceof ElementTest))
+            throw new ParseException("\"" + nodeTest + "\" in \"" + msgContext
+                    + "\" is not an element test");
+        ElementTest elemTest = (ElementTest) nodeTest;
+        final String tagName = elemTest.getTagName();
+
+        final Element newChild = new Element(tagName);
+
+        BooleanExpr predicate = step.getPredicate();
+
+        predicate.accept(new BooleanExprVisitor() {
+            public void visit(TrueExpr a) {
+            //do nothing
+            }
+
+            public void visit(AttrExistsExpr a) throws XPathException {
+                newChild.setAttribute(a.getAttrName(), "something");
+            }
+
+            public void visit(AttrEqualsExpr a) throws XPathException {
+                newChild.setAttribute(a.getAttrName(), a.getAttrValue());
+            }
+
+            public void visit(AttrNotEqualsExpr a) throws XPathException {
+                newChild.setAttribute(a.getAttrName(), "not " + a.getAttrValue());
+            }
+
+            public void visit(AttrLessExpr a) throws XPathException {
+                newChild.setAttribute(a.getAttrName(), Long.toString(Long.MIN_VALUE));
+            }
+
+            public void visit(AttrGreaterExpr a) throws XPathException {
+                newChild.setAttribute(a.getAttrName(), Long.toString(Long.MAX_VALUE));
+            }
+
+            public void visit(TextExistsExpr a) throws XPathException {
+                newChild.appendChild(new Text("something"));
+            }
+
+            public void visit(TextEqualsExpr a) throws XPathException {
+                newChild.appendChild(new Text(a.getValue()));
+            }
+
+            public void visit(TextNotEqualsExpr a) throws XPathException {
+                newChild.appendChild(new Text("not " + a.getValue()));
+            }
+
+            public void visit(PositionEqualsExpr a) throws XPathException {
+                int posn = a.getPosition();
+                if (parent == null && posn != 1)
+                    throw new XPathException(XPath.get(msgContext),
+                            "Position of root node must be 1");
+                int lastPosition = 1; //newChild is at position 1
+                while (lastPosition < posn) {
+                    parent.appendChild(new Element(tagName));
+                    ++lastPosition;
+                }
+
+            }
+        });
+        return newChild;
+    }
+
+    /** Select all the elements that match the relative XPath
+        expression with respect to this node. */
+    public abstract Enumeration xpathSelectElements(String xpath) throws ParseException;
+
+    //throws XPathException, IOException;
+
+    /** Select all the strings that match the relative XPath
+        expression with respect to this node. */
+    public abstract Enumeration xpathSelectStrings(String xpath) throws ParseException;
+
+    //throws XPathException, IOException;
+
+    /** Select the first element that matches the relative XPath
+        expression with respect to this node, or null if
+        there is no match.*/
+    public abstract Element xpathSelectElement(String xpath) throws ParseException;
+
+    /** Select the first element that matches the relative XPath
+        expression with respect to this node, or null if
+        there is no match. */
+    public abstract String xpathSelectString(String xpath) throws ParseException;
+
+    abstract public Object clone();
+
+    //public abstract Node cloneNode(Document doc) throws DOMException;
+
+    /** Hierarchically concatenated text nodes.*/
+    public String toString() {
+        try {
+            //Cannot use StringWriter because not supported by J2ME
+            ByteArrayOutputStream o = new ByteArrayOutputStream();
+            Writer w = new OutputStreamWriter(o);
+            toString(w);
+            w.flush();
+            return new String(o.toByteArray());
+        } catch (IOException e) {
+            return super.toString();
+        }
+    }
+
+    abstract void toString(Writer writer) throws IOException;
+
+    abstract void toXml(Writer writer) throws IOException;
+
+    /** Quote special XML characters '<', '>', '&', '"' if necessary,
+     *  and write to character stream.  We write to a character stream
+     *  rather than simply returning a stream to avoid creating
+     *  unneccessary objects.*/
+    static protected void htmlEncode(Writer writer, String string) throws IOException {
+        int n = string.length();
+        int writeNext = 0;
+        for (int i = 0; i < n; ++i) {
+            int ch = string.charAt(i);
+            String encoded;
+            if (ch >= 128)
+                encoded = "&#" + ch + ";";
+            else
+                switch (ch) {
+                    case '<':
+                        encoded = "&lt;";
+                        break;
+                    case '>':
+                        encoded = "&gt;";
+                        break;
+                    case '&':
+                        encoded = "&amp;";
+                        break;
+                    case '\"':
+                        encoded = "&quot;";
+                        break;
+                    case '\'':
+                        encoded = "&#39;";
+                        break;
+                    default:
+                        encoded = null;
+                        break;
+                }
+            if (encoded != null) {
+                writer.write(string, writeNext, i - writeNext);
+                writer.write(encoded);
+                writeNext = i + 1;
+            }
+        }
+        if (writeNext < n) writer.write(string, writeNext, n - writeNext);
+    }
+
+    /** Called whenever cached version of hashCode needs to be regenerated. */
+    abstract protected int computeHashCode();
+
+    /* 
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        if (hash_ == 0) hash_ = computeHashCode();
+        return hash_;
+    }
+
+    /**
+     * @label ownerDocument
+     */
+    private Document doc_ = null;
+
+    /**
+     * @label parent
+     */
+    private Element parentNode_ = null;
+
+    /**
+     * @label previousSibling
+     */
+    private Node previousSibling_ = null;
+
+    /**
+     * @label nextSibling
+     */
+    private Node nextSibling_ = null;
+    private Object annotation_ = null;
+
+    private int hash_ = 0;
 }
 
 // $Log: Node.java,v $

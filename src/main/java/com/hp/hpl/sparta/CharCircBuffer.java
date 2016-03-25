@@ -22,59 +22,59 @@ package com.hp.hpl.sparta;
 
 class CharCircBuffer {
 
-  CharCircBuffer(int n) {
-    buf_ = new int[n];
-  }
-
-  void enable() {
-    enabled_ = true;
-  }
-
-  void disable() {
-    enabled_ = false;
-  }
-
-  void addInt(int i) {
-    addRaw(i + 0x10000);
-  }
-
-  void addChar(char ch) {
-    addRaw(ch);
-  }
-
-  private void addRaw(int v) {
-    if (enabled_) {
-      buf_[next_] = v;
-      next_ = (next_ + 1) % buf_.length;
-      ++total_;
+    CharCircBuffer(int n) {
+        buf_ = new int[n];
     }
-  }
 
-  void addString(String s) {
-    char[] chars = s.toCharArray();
-    int slen = chars.length;
-    for (int i = 0; i < slen; ++i)
-      addChar(chars[i]);
-  }
-
-  public String toString() {
-    StringBuffer result = new StringBuffer(11 * buf_.length / 10);
-    int first_ = total_ < buf_.length ? buf_.length - total_ : 0;
-    for (int i = first_; i < buf_.length; ++i) {
-      int ii = (i + next_) % buf_.length;
-      int v = buf_[ii];
-      if (v < 0x10000)
-        result.append((char) v);
-      else
-        result.append(Integer.toString(v - 0x10000));
+    void enable() {
+        enabled_ = true;
     }
-    return result.toString();
-  }
 
-  private final int[] buf_; //Stores either the chars or the integers+0x10000
-  private int next_ = 0;
-  private int total_ = 0;
-  private boolean enabled_ = true;
+    void disable() {
+        enabled_ = false;
+    }
+
+    void addInt(int i) {
+        addRaw(i + 0x10000);
+    }
+
+    void addChar(char ch) {
+        addRaw(ch);
+    }
+
+    private void addRaw(int v) {
+        if (enabled_) {
+            buf_[next_] = v;
+            next_ = (next_ + 1) % buf_.length;
+            ++total_;
+        }
+    }
+
+    void addString(String s) {
+        char[] chars = s.toCharArray();
+        int slen = chars.length;
+        for (int i = 0; i < slen; ++i)
+            addChar(chars[i]);
+    }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer(11 * buf_.length / 10);
+        int first_ = total_ < buf_.length ? buf_.length - total_ : 0;
+        for (int i = first_; i < buf_.length; ++i) {
+            int ii = (i + next_) % buf_.length;
+            int v = buf_[ii];
+            if (v < 0x10000)
+                result.append((char) v);
+            else
+                result.append(Integer.toString(v - 0x10000));
+        }
+        return result.toString();
+    }
+
+    private final int[] buf_; //Stores either the chars or the integers+0x10000
+    private int next_ = 0;
+    private int total_ = 0;
+    private boolean enabled_ = true;
 }
 
 

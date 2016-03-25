@@ -19,22 +19,22 @@ package com.hp.hpl.sparta;
  @author Eamonn O'Brien-Strain
  */
 public class DOMException extends Exception {
-  public DOMException(short code, String message) {
-    super(message);
-    this.code = code;
-  }
+    public DOMException(short code, String message) {
+        super(message);
+        this.code = code;
+    }
 
-  public short code;
-  //public static final short           INDEX_SIZE_ERR       = 1;
-  public static final short DOMSTRING_SIZE_ERR = 2;
-  public static final short HIERARCHY_REQUEST_ERR = 3;
-  //public static final short           WRONG_DOCUMENT_ERR   = 4;
-  //public static final short           INVALID_CHARACTER_ERR = 5;
-  //public static final short           NO_DATA_ALLOWED_ERR  = 6;
-  //public static final short           NO_MODIFICATION_ALLOWED_ERR = 7;
-  public static final short NOT_FOUND_ERR = 8;
-  //public static final short           NOT_SUPPORTED_ERR    = 9;
-  //public static final short           INUSE_ATTRIBUTE_ERR  = 10;
+    public short code;
+    //public static final short           INDEX_SIZE_ERR       = 1;
+    public static final short DOMSTRING_SIZE_ERR = 2;
+    public static final short HIERARCHY_REQUEST_ERR = 3;
+    //public static final short           WRONG_DOCUMENT_ERR   = 4;
+    //public static final short           INVALID_CHARACTER_ERR = 5;
+    //public static final short           NO_DATA_ALLOWED_ERR  = 6;
+    //public static final short           NO_MODIFICATION_ALLOWED_ERR = 7;
+    public static final short NOT_FOUND_ERR = 8;
+    //public static final short           NOT_SUPPORTED_ERR    = 9;
+    //public static final short           INUSE_ATTRIBUTE_ERR  = 10;
 
 }
 

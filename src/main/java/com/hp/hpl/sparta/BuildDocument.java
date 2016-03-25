@@ -18,106 +18,106 @@ package com.hp.hpl.sparta;
 
 class BuildDocument implements DocumentSource, ParseHandler {
 
-  public BuildDocument() {
-    this(null);
-  }
-
-  public BuildDocument(ParseLog log) {
-    log_ = (log == null) ? DEFAULT_LOG : log;
-  }
-
-  public void setParseSource(ParseSource ps) {
-    parseSource_ = ps;
-    doc_.setSystemId(ps.toString());
-  }
-
-  public ParseSource getParseSource() {
-    return parseSource_;
-  }
-
-  public String toString() {
-    if (parseSource_ != null)
-      return "BuildDoc: " + parseSource_.toString();
-    else
-      return null;
-  }
-
-  public String getSystemId() {
-    if (parseSource_ != null)
-      return parseSource_.getSystemId();
-    else
-      return null;
-  }
-
-  public int getLineNumber() {
-    if (parseSource_ != null)
-      return parseSource_.getLineNumber();
-    else
-      return -1;
-  }
-
-  /** The parsed document. */
-  public Document getDocument() {
-    return doc_;
-  }
-
-  public void startDocument() {}
-
-  public void endDocument() {
-  /* DEBUG
-     if (currentElement_ != null)
-     log_.warning("EndDocument: currentElement is not null",
-     getSystemId(), getLineNumber());
-   */
-  }
-
-  public void startElement(Element element) {
-    if (currentElement_ == null) {
-      doc_.setDocumentElement(element);
-    } else {
-      currentElement_.appendChild(element);
+    public BuildDocument() {
+        this(null);
     }
-    currentElement_ = element;
-  }
 
-  public void endElement(Element element) {
-    /* DEBUG
-       if (isCENull())
-       return;
-       if (element != currentElement_) {
-       log_.warning("EndElement (" + element.getTagName() +
-       ") does not match currentElement (" +
-       currentElement_.getTagName() + ")", getSystemId(),
-       getLineNumber());
-       return;
-       }
-     */
-
-    currentElement_ = (Element) currentElement_.getParentNode();
-  }
-
-  public void characters(char[] buf, int offset, int len) {
-    /* DEBUG
-       if (isCENull())
-       return;
-     */
-
-    Element element = currentElement_;
-    if (element.getLastChild() instanceof Text) {
-      Text text = (Text) element.getLastChild();
-      text.appendData(buf, offset, len);
-    } else {
-      Text text = new Text(new String(buf, offset, len));
-      element.appendChildNoChecking(text);
+    public BuildDocument(ParseLog log) {
+        log_ = (log == null) ? DEFAULT_LOG : log;
     }
-  }
+
+    public void setParseSource(ParseSource ps) {
+        parseSource_ = ps;
+        doc_.setSystemId(ps.toString());
+    }
+
+    public ParseSource getParseSource() {
+        return parseSource_;
+    }
+
+    public String toString() {
+        if (parseSource_ != null)
+            return "BuildDoc: " + parseSource_.toString();
+        else
+            return null;
+    }
+
+    public String getSystemId() {
+        if (parseSource_ != null)
+            return parseSource_.getSystemId();
+        else
+            return null;
+    }
+
+    public int getLineNumber() {
+        if (parseSource_ != null)
+            return parseSource_.getLineNumber();
+        else
+            return -1;
+    }
+
+    /** The parsed document. */
+    public Document getDocument() {
+        return doc_;
+    }
+
+    public void startDocument() {}
+
+    public void endDocument() {
+    /* DEBUG
+       if (currentElement_ != null)
+       log_.warning("EndDocument: currentElement is not null",
+       getSystemId(), getLineNumber());
+     */
+    }
+
+    public void startElement(Element element) {
+        if (currentElement_ == null) {
+            doc_.setDocumentElement(element);
+        } else {
+            currentElement_.appendChild(element);
+        }
+        currentElement_ = element;
+    }
+
+    public void endElement(Element element) {
+        /* DEBUG
+           if (isCENull())
+           return;
+           if (element != currentElement_) {
+           log_.warning("EndElement (" + element.getTagName() +
+           ") does not match currentElement (" +
+           currentElement_.getTagName() + ")", getSystemId(),
+           getLineNumber());
+           return;
+           }
+         */
+
+        currentElement_ = (Element) currentElement_.getParentNode();
+    }
+
+    public void characters(char[] buf, int offset, int len) {
+        /* DEBUG
+           if (isCENull())
+           return;
+         */
+
+        Element element = currentElement_;
+        if (element.getLastChild() instanceof Text) {
+            Text text = (Text) element.getLastChild();
+            text.appendData(buf, offset, len);
+        } else {
+            Text text = new Text(new String(buf, offset, len));
+            element.appendChildNoChecking(text);
+        }
+    }
 
 
-  private final ParseLog log_;
+    private final ParseLog log_;
 
-  private Element currentElement_ = null;
-  private final Document doc_ = new Document();
-  private ParseSource parseSource_ = null;
+    private Element currentElement_ = null;
+    private final Document doc_ = new Document();
+    private ParseSource parseSource_ = null;
 }
 
 // $Log: BuildDocument.java,v $

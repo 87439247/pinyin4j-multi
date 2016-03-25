@@ -19,26 +19,26 @@ package com.hp.hpl.sparta;
  */
 public class DefaultParseHandler implements ParseHandler {
 
-  private ParseSource parseSource_ = null;
+    private ParseSource parseSource_ = null;
 
-  public void setParseSource(ParseSource ps) {
-    parseSource_ = ps;
-  }
+    public void setParseSource(ParseSource ps) {
+        parseSource_ = ps;
+    }
 
-  public ParseSource getParseSource() {
-    return parseSource_;
-  }
+    public ParseSource getParseSource() {
+        return parseSource_;
+    }
 
-  public void startDocument() throws ParseException {}
+    public void startDocument() throws ParseException {}
 
 
-  public void endDocument() throws ParseException {}
+    public void endDocument() throws ParseException {}
 
-  public void startElement(Element element) throws ParseException {}
+    public void startElement(Element element) throws ParseException {}
 
-  public void endElement(Element element) throws ParseException {}
+    public void endElement(Element element) throws ParseException {}
 
-  public void characters(char[] buf, int off, int len) throws ParseException {}
+    public void characters(char[] buf, int off, int len) throws ParseException {}
 
 }
 

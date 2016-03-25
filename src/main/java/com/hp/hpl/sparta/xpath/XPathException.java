@@ -20,52 +20,52 @@ import java.io.*;
 
 public class XPathException extends Exception {
 
-  public XPathException(XPath xpath, String msg) {
-    super(xpath + " " + msg);
-  }
-
-  XPathException(XPath xpath, String where, SimpleStreamTokenizer toks, String expected) {
-    this(xpath, where + " got \"" + toString(toks) + "\" instead of expected " + expected);
-  }
-
-  XPathException(XPath xpath, Exception cause) {
-    super(xpath + " " + cause);
-    cause_ = cause;
-  }
-
-  public Throwable getCause() {
-    return cause_;
-  }
-
-  static private String toString(SimpleStreamTokenizer toks) {
-    try {
-      StringBuffer result = new StringBuffer();
-      result.append(tokenToString(toks));
-      if (toks.ttype != SimpleStreamTokenizer.TT_EOF) {
-        toks.nextToken();
-        result.append(tokenToString(toks));
-        toks.pushBack();
-      }
-      return result.toString();
-    } catch (IOException e) {
-      return "(cannot get  info: " + e + ")";
+    public XPathException(XPath xpath, String msg) {
+        super(xpath + " " + msg);
     }
-  }
 
-  static private String tokenToString(SimpleStreamTokenizer toks) {
-    switch (toks.ttype) {
-      case SimpleStreamTokenizer.TT_EOF:
-        return "<end of expression>";
-      case SimpleStreamTokenizer.TT_NUMBER:
-        return toks.nval + "";
-      case SimpleStreamTokenizer.TT_WORD:
-        return toks.sval;
-      default:
-        return (char) toks.ttype + "";
+    XPathException(XPath xpath, String where, SimpleStreamTokenizer toks, String expected) {
+        this(xpath, where + " got \"" + toString(toks) + "\" instead of expected " + expected);
     }
-  }
 
-  private Throwable cause_ = null;
+    XPathException(XPath xpath, Exception cause) {
+        super(xpath + " " + cause);
+        cause_ = cause;
+    }
+
+    public Throwable getCause() {
+        return cause_;
+    }
+
+    static private String toString(SimpleStreamTokenizer toks) {
+        try {
+            StringBuffer result = new StringBuffer();
+            result.append(tokenToString(toks));
+            if (toks.ttype != SimpleStreamTokenizer.TT_EOF) {
+                toks.nextToken();
+                result.append(tokenToString(toks));
+                toks.pushBack();
+            }
+            return result.toString();
+        } catch (IOException e) {
+            return "(cannot get  info: " + e + ")";
+        }
+    }
+
+    static private String tokenToString(SimpleStreamTokenizer toks) {
+        switch (toks.ttype) {
+            case SimpleStreamTokenizer.TT_EOF:
+                return "<end of expression>";
+            case SimpleStreamTokenizer.TT_NUMBER:
+                return toks.nval + "";
+            case SimpleStreamTokenizer.TT_WORD:
+                return toks.sval;
+            default:
+                return (char) toks.ttype + "";
+        }
+    }
+
+    private Throwable cause_ = null;
 }
 
 // $Log: XPathException.java,v $

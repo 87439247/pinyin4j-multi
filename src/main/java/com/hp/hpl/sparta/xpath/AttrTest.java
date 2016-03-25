@@ -19,28 +19,28 @@ package com.hp.hpl.sparta.xpath;
  */
 public class AttrTest extends NodeTest {
 
-  AttrTest(String attrName) {
-    attrName_ = attrName;
-  }
+    AttrTest(String attrName) {
+        attrName_ = attrName;
+    }
 
-  public void accept(Visitor visitor) {
-    visitor.visit(this);
-  }
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-  /** Return true*/
-  public boolean isStringValue() {
-    return true;
-  }
+    /** Return true*/
+    public boolean isStringValue() {
+        return true;
+    }
 
-  public String getAttrName() {
-    return attrName_;
-  }
+    public String getAttrName() {
+        return attrName_;
+    }
 
-  public String toString() {
-    return "@" + attrName_;
-  }
+    public String toString() {
+        return "@" + attrName_;
+    }
 
-  private final String attrName_;
+    private final String attrName_;
 }
 
 // $Log: AttrTest.java,v $

@@ -17,95 +17,95 @@ package com.hp.hpl.sparta;
  */
 public class ParseException extends Exception {
 
-  public ParseException(String msg) {
-    super(msg);
-  }
+    public ParseException(String msg) {
+        super(msg);
+    }
 
-  /* For use by handlers */
-  public ParseException(String msg, Throwable cause) {
-    super(msg + " " + cause);
-    this.cause_ = cause;
-  }
+    /* For use by handlers */
+    public ParseException(String msg, Throwable cause) {
+        super(msg + " " + cause);
+        this.cause_ = cause;
+    }
 
-  /* Using systemID */
-  public ParseException(String systemId, int lineNumber, int lastCharRead, String history,
-      String msg) {
-    super(toMessage(systemId, lineNumber, lastCharRead, history, msg));
-    lineNumber_ = lineNumber;
-  }
+    /* Using systemID */
+    public ParseException(String systemId, int lineNumber, int lastCharRead, String history,
+            String msg) {
+        super(toMessage(systemId, lineNumber, lastCharRead, history, msg));
+        lineNumber_ = lineNumber;
+    }
 
-  public ParseException(ParseLog log, String systemId, int lineNumber, int lastCharRead,
-      String history, String msg) {
-    this(systemId, lineNumber, lastCharRead, history, msg);
-    log.error(msg, systemId, lineNumber);
-  }
+    public ParseException(ParseLog log, String systemId, int lineNumber, int lastCharRead,
+            String history, String msg) {
+        this(systemId, lineNumber, lastCharRead, history, msg);
+        log.error(msg, systemId, lineNumber);
+    }
 
 
-  public ParseException(ParseCharStream source, String msg) {
-    this(source.getLog(), source.getSystemId(), source.getLineNumber(), source.getLastCharRead(),
-        source.getHistory(), msg);
-  }
+    public ParseException(ParseCharStream source, String msg) {
+        this(source.getLog(), source.getSystemId(), source.getLineNumber(), source
+                .getLastCharRead(), source.getHistory(), msg);
+    }
 
-  public ParseException(ParseCharStream source, char actual, char expected) {
-    this(source, "got \'" + actual + "\' instead of expected \'" + expected + "\'");
-  }
+    public ParseException(ParseCharStream source, char actual, char expected) {
+        this(source, "got \'" + actual + "\' instead of expected \'" + expected + "\'");
+    }
 
-  /** Precondition: expected.length > 0 */
-  public ParseException(ParseCharStream source, char actual, char[] expected) {
-    this(source, "got \'" + actual + "\' instead of " + toString(expected));
-  }
+    /** Precondition: expected.length > 0 */
+    public ParseException(ParseCharStream source, char actual, char[] expected) {
+        this(source, "got \'" + actual + "\' instead of " + toString(expected));
+    }
 
-  public ParseException(ParseCharStream source, char actual, String expected) {
-    this(source, "got \'" + actual + "\' instead of " + expected + " as expected");
-  }
+    public ParseException(ParseCharStream source, char actual, String expected) {
+        this(source, "got \'" + actual + "\' instead of " + expected + " as expected");
+    }
 
-  public ParseException(ParseCharStream source, String actual, String expected) {
-    this(source, "got \"" + actual + "\" instead of \"" + expected + "\" as expected");
-  }
+    public ParseException(ParseCharStream source, String actual, String expected) {
+        this(source, "got \"" + actual + "\" instead of \"" + expected + "\" as expected");
+    }
 
-  static private String toString(char[] chars) {
-    StringBuffer result = new StringBuffer();
-    result.append(chars[0]);
-    for (int i = 1; i < chars.length; ++i)
-      result.append("or " + chars[i]);
-    return result.toString();
-  }
+    static private String toString(char[] chars) {
+        StringBuffer result = new StringBuffer();
+        result.append(chars[0]);
+        for (int i = 1; i < chars.length; ++i)
+            result.append("or " + chars[i]);
+        return result.toString();
+    }
 
-  public ParseException(ParseCharStream source, String actual, char[] expected) {
-    this(source, actual, new String(expected));
-  }
+    public ParseException(ParseCharStream source, String actual, char[] expected) {
+        this(source, actual, new String(expected));
+    }
 
-  public int getLineNumber() {
-    return lineNumber_;
-  }
+    public int getLineNumber() {
+        return lineNumber_;
+    }
 
-  private int lineNumber_ = -1;
+    private int lineNumber_ = -1;
 
-  public Throwable getCause() {
-    return cause_;
-  }
+    public Throwable getCause() {
+        return cause_;
+    }
 
-  //////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
 
-  /*static private String toMessage(ParseCharStream source, String msg){
-    return toMessage( source.getSystemId(),
-    source.getLineNumber(),
-    source.getLastCharRead(),
-    source.getHistory(),
-    msg );
-    }*/
+    /*static private String toMessage(ParseCharStream source, String msg){
+      return toMessage( source.getSystemId(),
+      source.getLineNumber(),
+      source.getLastCharRead(),
+      source.getHistory(),
+      msg );
+      }*/
 
-  static private String toMessage(String systemId, int lineNumber, int lastCharRead,
-      String history, String msg) {
-    return systemId + "(" + lineNumber + "): \n" + history + "\nLast character read was \'"
-        + charRepr(lastCharRead) + "\'\n" + msg;
-  }
+    static private String toMessage(String systemId, int lineNumber, int lastCharRead,
+            String history, String msg) {
+        return systemId + "(" + lineNumber + "): \n" + history + "\nLast character read was \'"
+                + charRepr(lastCharRead) + "\'\n" + msg;
+    }
 
-  static String charRepr(int ch) {
-    return (ch == -1) ? "EOF" : ("" + (char) ch);
-  }
+    static String charRepr(int ch) {
+        return (ch == -1) ? "EOF" : ("" + (char) ch);
+    }
 
-  private Throwable cause_ = null;
+    private Throwable cause_ = null;
 
 }
 

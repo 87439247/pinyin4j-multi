@@ -18,23 +18,23 @@ package com.hp.hpl.sparta.xpath;
 
 public class PositionEqualsExpr extends BooleanExpr {
 
-  public PositionEqualsExpr(int position) {
-    position_ = position;
-  }
+    public PositionEqualsExpr(int position) {
+        position_ = position;
+    }
 
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public int getPosition() {
-    return position_;
-  }
+    public int getPosition() {
+        return position_;
+    }
 
-  public String toString() {
-    return "[" + position_ + "]";
-  }
+    public String toString() {
+        return "[" + position_ + "]";
+    }
 
-  private final int position_;
+    private final int position_;
 }
 
 // $Log: PositionEqualsExpr.java,v $

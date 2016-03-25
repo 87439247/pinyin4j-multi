@@ -28,107 +28,107 @@ import java.util.Hashtable;
  * */
 public class Sparta {
 
-  /** Used internally by Sparta code to intern strings because the
-   * String.intern method is not supported in older and smaller JVMs. 
-   * @see String#intern */
-  static public String intern(String s) {
-    return internment_.intern(s);
-  }
-
-
-  /** Pass an object that implements this interface to setInternment. */
-  static public interface Internment {
-    String intern(String s);
-  }
-
-  /** Change the String intern to something custom.  For example if
-   * you are running on a modern full J2EE or JDSE JVM you almost certainly
-   * want to tell Sparta to use the standard String.inter method like this: <PRE>
-  public class MyApplication {
-  static{
-      Sparta.setInternment(new Sparta.Internment(){
-          public String intern(String s) {
-              return s.intern();
-          }
-      });
-  }
-  public static void main(String[] args) {
-    ...
-  
-  </PRE>
-   * */
-  static public void setInternment(Internment i) {
-    internment_ = i;
-  }
-
-  /** The default internment used internally that does not rely on
-   * String.intern being supported by the JVM. */
-  static private Internment internment_ = new Internment() {
-    private final Hashtable strings_ = new Hashtable();
-
-    public String intern(String s) {
-      String ss = (String) strings_.get(s);
-      if (ss == null) {
-        strings_.put(s, s);
-        return s;
-      } else
-        return ss;
+    /** Used internally by Sparta code to intern strings because the
+     * String.intern method is not supported in older and smaller JVMs. 
+     * @see String#intern */
+    static public String intern(String s) {
+        return internment_.intern(s);
     }
-  };
 
-  //////////////////////////////////////////////////////////////
 
-  /** What a CacheFactory generates. Used internally to cache collections 
-   * of objects.*/
-  static public interface Cache {
-    Object get(Object key);
-
-    Object put(Object key, Object value);
-
-    int size();
-  }
-
-  /** You should pass an object that implements this interface to
-   * setCacheFactory. */
-  static public interface CacheFactory {
-    Cache create();
-  }
-
-  /** Used internally to create a cache. */
-  static Cache newCache() {
-    return cacheFactory_.create();
-  }
-
-  /** Change the caching to something custom.  The default CacheFactory
-   * simply creates Hashtables which grow without bound.  If you are 
-   * running Sparta in a long-lived application and you want to avoid
-   * memory leaks you should use caches that automatically evict using, for
-   * example an LRU mechanism or soft reference.  For example if you have
-   * a class called LruMap that sub-classes from hava.util.Map then you
-   * can tell Sparta to use that by as follows <PRE>
-   * 
-  public class MyApplication {
-  static private class LruCache extends LruMap implements Sparta.Cache {}
-  static{
-      Sparta.setCacheFactory(new Sparta.CacheFactory(){
-          public Sparta.Cache create() {
-              return new SoftCache();
-          }
-      });
-  }
-  public static void main(String[] args) {
-    ...
-  </PRE>
-   * */
-  static public void setCacheFactory(CacheFactory f) {
-    cacheFactory_ = f;
-  }
-
-  static private class HashtableCache extends Hashtable implements Cache {}
-
-  static private CacheFactory cacheFactory_ = new CacheFactory() {
-    public Cache create() {
-      return new HashtableCache();
+    /** Pass an object that implements this interface to setInternment. */
+    static public interface Internment {
+        String intern(String s);
     }
-  };
+
+    /** Change the String intern to something custom.  For example if
+     * you are running on a modern full J2EE or JDSE JVM you almost certainly
+     * want to tell Sparta to use the standard String.inter method like this: <PRE>
+    public class MyApplication {
+    static{
+        Sparta.setInternment(new Sparta.Internment(){
+            public String intern(String s) {
+                return s.intern();
+            }
+        });
+    }
+    public static void main(String[] args) {
+      ...
+    
+    </PRE>
+     * */
+    static public void setInternment(Internment i) {
+        internment_ = i;
+    }
+
+    /** The default internment used internally that does not rely on
+     * String.intern being supported by the JVM. */
+    static private Internment internment_ = new Internment() {
+        private final Hashtable strings_ = new Hashtable();
+
+        public String intern(String s) {
+            String ss = (String) strings_.get(s);
+            if (ss == null) {
+                strings_.put(s, s);
+                return s;
+            } else
+                return ss;
+        }
+    };
+
+    //////////////////////////////////////////////////////////////
+
+    /** What a CacheFactory generates. Used internally to cache collections 
+     * of objects.*/
+    static public interface Cache {
+        Object get(Object key);
+
+        Object put(Object key, Object value);
+
+        int size();
+    }
+
+    /** You should pass an object that implements this interface to
+     * setCacheFactory. */
+    static public interface CacheFactory {
+        Cache create();
+    }
+
+    /** Used internally to create a cache. */
+    static Cache newCache() {
+        return cacheFactory_.create();
+    }
+
+    /** Change the caching to something custom.  The default CacheFactory
+     * simply creates Hashtables which grow without bound.  If you are 
+     * running Sparta in a long-lived application and you want to avoid
+     * memory leaks you should use caches that automatically evict using, for
+     * example an LRU mechanism or soft reference.  For example if you have
+     * a class called LruMap that sub-classes from hava.util.Map then you
+     * can tell Sparta to use that by as follows <PRE>
+     * 
+    public class MyApplication {
+    static private class LruCache extends LruMap implements Sparta.Cache {}
+    static{
+        Sparta.setCacheFactory(new Sparta.CacheFactory(){
+            public Sparta.Cache create() {
+                return new SoftCache();
+            }
+        });
+    }
+    public static void main(String[] args) {
+      ...
+    </PRE>
+     * */
+    static public void setCacheFactory(CacheFactory f) {
+        cacheFactory_ = f;
+    }
+
+    static private class HashtableCache extends Hashtable implements Cache {}
+
+    static private CacheFactory cacheFactory_ = new CacheFactory() {
+        public Cache create() {
+            return new HashtableCache();
+        }
+    };
 }

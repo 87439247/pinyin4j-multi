@@ -20,19 +20,19 @@ package com.hp.hpl.sparta;
 
 public interface ParseHandler {
 
-  void setParseSource(ParseSource ps);
+    void setParseSource(ParseSource ps);
 
-  ParseSource getParseSource();
+    ParseSource getParseSource();
 
-  void startDocument() throws ParseException;
+    void startDocument() throws ParseException;
 
-  void endDocument() throws ParseException;
+    void endDocument() throws ParseException;
 
-  void startElement(Element element) throws ParseException;
+    void startElement(Element element) throws ParseException;
 
-  void endElement(Element element) throws ParseException;
+    void endElement(Element element) throws ParseException;
 
-  void characters(char[] buf, int offset, int len) throws ParseException;
+    void characters(char[] buf, int offset, int len) throws ParseException;
 
 }
 

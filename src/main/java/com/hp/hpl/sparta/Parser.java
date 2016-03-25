@@ -32,133 +32,133 @@ import java.io.*;
 
 public class Parser {
 
-  /* DOM parse calls */
+    /* DOM parse calls */
 
-  /** DOM parsing of XML in a character stream, using a default log. **/
-  static public Document parse(String systemId, Reader reader) throws ParseException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseCharStream(systemId, reader, null, null, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML in a character stream, using a default log. **/
+    static public Document parse(String systemId, Reader reader) throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseCharStream(systemId, reader, null, null, bd);
+        return bd.getDocument();
+    }
 
-  /** DOM parsing of XML in a character stream. **/
-  static public Document parse(String systemId, Reader reader, ParseLog log) throws ParseException,
-      IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseCharStream(systemId, reader, log, null, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML in a character stream. **/
+    static public Document parse(String systemId, Reader reader, ParseLog log)
+            throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseCharStream(systemId, reader, log, null, bd);
+        return bd.getDocument();
+    }
 
-  /** DOM parsing of XML in a String. **/
-  static public Document parse(String xml) throws ParseException, IOException {
-    return parse(xml.toCharArray());
-  }
+    /** DOM parsing of XML in a String. **/
+    static public Document parse(String xml) throws ParseException, IOException {
+        return parse(xml.toCharArray());
+    }
 
-  /** DOM parsing of XML in a character array (this is the fastest parse method). **/
-  static public Document parse(char[] xml) throws ParseException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseCharStream("file:anonymous-string", xml, null, null, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML in a character array (this is the fastest parse method). **/
+    static public Document parse(char[] xml) throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseCharStream("file:anonymous-string", xml, null, null, bd);
+        return bd.getDocument();
+    }
 
-  /**
-   * Parse XML to DOM, figuring out the encoding using the first few characters and possibly
-   * an encoding declaration on the first line of the XML.
-   * @param xml stored in an array of bytes in some Unicode encoding.
-   * @return the DOM Document resulting from the parsing
-   * @throws ParseException on parse error
-   */
-  static public Document parse(byte[] xml) throws ParseException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseByteStream("file:anonymous-string", new ByteArrayInputStream(xml), null, null, bd);
-    return bd.getDocument();
+    /**
+     * Parse XML to DOM, figuring out the encoding using the first few characters and possibly
+     * an encoding declaration on the first line of the XML.
+     * @param xml stored in an array of bytes in some Unicode encoding.
+     * @return the DOM Document resulting from the parsing
+     * @throws ParseException on parse error
+     */
+    static public Document parse(byte[] xml) throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseByteStream("file:anonymous-string", new ByteArrayInputStream(xml), null, null, bd);
+        return bd.getDocument();
 
-  }
+    }
 
-  /** DOM parsing of XML in a character stream, specifying the Unicode encoding. */
-  static public Document parse(String systemId, Reader reader, ParseLog log, String encoding)
-      throws ParseException, EncodingMismatchException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseCharStream(systemId, reader, log, encoding, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML in a character stream, specifying the Unicode encoding. */
+    static public Document parse(String systemId, Reader reader, ParseLog log, String encoding)
+            throws ParseException, EncodingMismatchException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseCharStream(systemId, reader, log, encoding, bd);
+        return bd.getDocument();
+    }
 
-  /** DOM parsing of XML encoded in a byte stream. */
-  static public Document parse(String systemId, InputStream istream, ParseLog log)
-      throws ParseException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseByteStream(systemId, istream, log, null, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML encoded in a byte stream. */
+    static public Document parse(String systemId, InputStream istream, ParseLog log)
+            throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseByteStream(systemId, istream, log, null, bd);
+        return bd.getDocument();
+    }
 
-  /** DOM parsing of XML encoded in a byte stream, using a default log. */
-  static public Document parse(String systemId, InputStream istream) throws ParseException,
-      IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseByteStream(systemId, istream, null, null, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML encoded in a byte stream, using a default log. */
+    static public Document parse(String systemId, InputStream istream) throws ParseException,
+            IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseByteStream(systemId, istream, null, null, bd);
+        return bd.getDocument();
+    }
 
-  /** DOM parsing of XML encoded in a character stream, specifying the Unicode encoding. */
-  static public Document parse(String systemId, InputStream istream, ParseLog log,
-      String guessedEncoding) throws ParseException, IOException {
-    BuildDocument bd = new BuildDocument();
-    new ParseByteStream(systemId, istream, log, guessedEncoding, bd);
-    return bd.getDocument();
-  }
+    /** DOM parsing of XML encoded in a character stream, specifying the Unicode encoding. */
+    static public Document parse(String systemId, InputStream istream, ParseLog log,
+            String guessedEncoding) throws ParseException, IOException {
+        BuildDocument bd = new BuildDocument();
+        new ParseByteStream(systemId, istream, log, guessedEncoding, bd);
+        return bd.getDocument();
+    }
 
-  /* SAX parse calls. Must give own ParseHandler */
+    /* SAX parse calls. Must give own ParseHandler */
 
-  /** SAX parsing of XML in character stream, using default log. */
-  static public void parse(String systemId, Reader reader, ParseHandler ph) throws ParseException,
-      IOException {
-    new ParseCharStream(systemId, reader, null, null, ph);
-  }
+    /** SAX parsing of XML in character stream, using default log. */
+    static public void parse(String systemId, Reader reader, ParseHandler ph)
+            throws ParseException, IOException {
+        new ParseCharStream(systemId, reader, null, null, ph);
+    }
 
-  /** SAX parsing of XML in character stream. */
-  static public void parse(String systemId, Reader reader, ParseLog log, ParseHandler ph)
-      throws ParseException, IOException {
-    new ParseCharStream(systemId, reader, log, null, ph);
-  }
+    /** SAX parsing of XML in character stream. */
+    static public void parse(String systemId, Reader reader, ParseLog log, ParseHandler ph)
+            throws ParseException, IOException {
+        new ParseCharStream(systemId, reader, log, null, ph);
+    }
 
-  /** SAX parsing of XML in a string. */
-  static public void parse(String xml, ParseHandler ph) throws ParseException, IOException {
-    parse(xml.toCharArray(), ph);
-  }
+    /** SAX parsing of XML in a string. */
+    static public void parse(String xml, ParseHandler ph) throws ParseException, IOException {
+        parse(xml.toCharArray(), ph);
+    }
 
-  /** SAX parsing of XML in a character array. */
-  static public void parse(char[] xml, ParseHandler ph) throws ParseException, IOException {
-    new ParseCharStream("file:anonymous-string", xml, null, null, ph);
-  }
+    /** SAX parsing of XML in a character array. */
+    static public void parse(char[] xml, ParseHandler ph) throws ParseException, IOException {
+        new ParseCharStream("file:anonymous-string", xml, null, null, ph);
+    }
 
-  /** SAX parsing of XML encoded in a byte array. */
-  static public void parse(byte[] xml, ParseHandler ph) throws ParseException, IOException {
-    new ParseByteStream("file:anonymous-string", new ByteArrayInputStream(xml), null, null, ph);
-  }
+    /** SAX parsing of XML encoded in a byte array. */
+    static public void parse(byte[] xml, ParseHandler ph) throws ParseException, IOException {
+        new ParseByteStream("file:anonymous-string", new ByteArrayInputStream(xml), null, null, ph);
+    }
 
-  /** SAX parsing of XML encoded in a byte stream, using default log. */
-  static public void parse(String systemId, InputStream istream, ParseLog log, ParseHandler ph)
-      throws ParseException, IOException {
-    new ParseByteStream(systemId, istream, log, null, ph);
-  }
+    /** SAX parsing of XML encoded in a byte stream, using default log. */
+    static public void parse(String systemId, InputStream istream, ParseLog log, ParseHandler ph)
+            throws ParseException, IOException {
+        new ParseByteStream(systemId, istream, log, null, ph);
+    }
 
-  /** SAX parsing of XML encoded in a byte stream. */
-  static public void parse(String systemId, InputStream istream, ParseHandler ph)
-      throws ParseException, IOException {
-    new ParseByteStream(systemId, istream, null, null, ph);
-  }
+    /** SAX parsing of XML encoded in a byte stream. */
+    static public void parse(String systemId, InputStream istream, ParseHandler ph)
+            throws ParseException, IOException {
+        new ParseByteStream(systemId, istream, null, null, ph);
+    }
 
-  /** SAX parsing of XML encoded in a byte stream, specifying the Unicode encoding. */
-  static public void parse(String systemId, InputStream istream, ParseLog log,
-      String guessedEncoding, ParseHandler ph) throws ParseException, IOException {
-    new ParseByteStream(systemId, istream, log, guessedEncoding, ph);
-  }
+    /** SAX parsing of XML encoded in a byte stream, specifying the Unicode encoding. */
+    static public void parse(String systemId, InputStream istream, ParseLog log,
+            String guessedEncoding, ParseHandler ph) throws ParseException, IOException {
+        new ParseByteStream(systemId, istream, log, guessedEncoding, ph);
+    }
 
-  /** SAX parsing of XML encoded in a character stream, specifying the Unicode encoding. */
-  static public void parse(String systemId, Reader reader, ParseLog log, String encoding,
-      ParseHandler ph) throws ParseException, EncodingMismatchException, IOException {
-    new ParseCharStream(systemId, reader, log, encoding, ph);
-  }
+    /** SAX parsing of XML encoded in a character stream, specifying the Unicode encoding. */
+    static public void parse(String systemId, Reader reader, ParseLog log, String encoding,
+            ParseHandler ph) throws ParseException, EncodingMismatchException, IOException {
+        new ParseCharStream(systemId, reader, log, encoding, ph);
+    }
 
 
 }

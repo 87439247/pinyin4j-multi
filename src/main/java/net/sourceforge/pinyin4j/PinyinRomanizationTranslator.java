@@ -29,47 +29,48 @@ import com.hp.hpl.sparta.ParseException;
  * 
  */
 class PinyinRomanizationTranslator {
-  /**
-   * convert the given unformatted Pinyin string from source Romanization
-   * system to target Romanization system
-   * 
-   * @param sourcePinyinStr
-   *            the given unformatted Pinyin string
-   * @param sourcePinyinSystem
-   *            the Romanization system which is currently used by the given
-   *            unformatted Pinyin string
-   * @param targetPinyinSystem
-   *            the Romanization system that should be converted to
-   * @return unformatted Pinyin string in target Romanization system; null if
-   *         error happens
-   */
-  static String convertRomanizationSystem(String sourcePinyinStr,
-      PinyinRomanizationType sourcePinyinSystem, PinyinRomanizationType targetPinyinSystem) {
-    String pinyinString = TextHelper.extractPinyinString(sourcePinyinStr);
-    String toneNumberStr = TextHelper.extractToneNumber(sourcePinyinStr);
+    /**
+     * convert the given unformatted Pinyin string from source Romanization
+     * system to target Romanization system
+     * 
+     * @param sourcePinyinStr
+     *            the given unformatted Pinyin string
+     * @param sourcePinyinSystem
+     *            the Romanization system which is currently used by the given
+     *            unformatted Pinyin string
+     * @param targetPinyinSystem
+     *            the Romanization system that should be converted to
+     * @return unformatted Pinyin string in target Romanization system; null if
+     *         error happens
+     */
+    static String convertRomanizationSystem(String sourcePinyinStr,
+            PinyinRomanizationType sourcePinyinSystem, PinyinRomanizationType targetPinyinSystem) {
+        String pinyinString = TextHelper.extractPinyinString(sourcePinyinStr);
+        String toneNumberStr = TextHelper.extractToneNumber(sourcePinyinStr);
 
-    // return value
-    String targetPinyinStr = null;
-    try {
-      // find the node of source Pinyin system
-      String xpathQuery1 =
-          "//" + sourcePinyinSystem.getTagName() + "[text()='" + pinyinString + "']";
+        // return value
+        String targetPinyinStr = null;
+        try {
+            // find the node of source Pinyin system
+            String xpathQuery1 =
+                    "//" + sourcePinyinSystem.getTagName() + "[text()='" + pinyinString + "']";
 
-      Document pinyinMappingDoc = PinyinRomanizationResource.getInstance().getPinyinMappingDoc();
+            Document pinyinMappingDoc =
+                    PinyinRomanizationResource.getInstance().getPinyinMappingDoc();
 
-      Element hanyuNode = pinyinMappingDoc.xpathSelectElement(xpathQuery1);
+            Element hanyuNode = pinyinMappingDoc.xpathSelectElement(xpathQuery1);
 
-      if (null != hanyuNode) {
-        // find the node of target Pinyin system
-        String xpathQuery2 = "../" + targetPinyinSystem.getTagName() + "/text()";
-        String targetPinyinStrWithoutToneNumber = hanyuNode.xpathSelectString(xpathQuery2);
+            if (null != hanyuNode) {
+                // find the node of target Pinyin system
+                String xpathQuery2 = "../" + targetPinyinSystem.getTagName() + "/text()";
+                String targetPinyinStrWithoutToneNumber = hanyuNode.xpathSelectString(xpathQuery2);
 
-        targetPinyinStr = targetPinyinStrWithoutToneNumber + toneNumberStr;
-      }
-    } catch (ParseException e) {
-      e.printStackTrace();
+                targetPinyinStr = targetPinyinStrWithoutToneNumber + toneNumberStr;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return targetPinyinStr;
     }
-
-    return targetPinyinStr;
-  }
 }

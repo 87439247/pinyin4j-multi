@@ -23,23 +23,23 @@ package com.hp.hpl.sparta.xpath;
  */
 public class ParentNodeTest extends NodeTest {
 
-  //only need one of them => GoF Flyweight Pattern(195) 
-  private ParentNodeTest() {}
+    //only need one of them => GoF Flyweight Pattern(195) 
+    private ParentNodeTest() {}
 
-  static final ParentNodeTest INSTANCE = new ParentNodeTest();
+    static final ParentNodeTest INSTANCE = new ParentNodeTest();
 
-  public void accept(Visitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    public void accept(Visitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  /** Return false*/
-  public boolean isStringValue() {
-    return false;
-  }
+    /** Return false*/
+    public boolean isStringValue() {
+        return false;
+    }
 
-  public String toString() {
-    return "..";
-  }
+    public String toString() {
+        return "..";
+    }
 
 }
 

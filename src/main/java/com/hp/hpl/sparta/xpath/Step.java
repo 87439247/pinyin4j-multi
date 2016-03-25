@@ -23,99 +23,100 @@ import java.io.*;
  */
 public class Step {
 
-  public static Step DOT = new Step(ThisNodeTest.INSTANCE, TrueExpr.INSTANCE);
+    public static Step DOT = new Step(ThisNodeTest.INSTANCE, TrueExpr.INSTANCE);
 
-  Step(NodeTest nodeTest, BooleanExpr predicate) {
-    nodeTest_ = nodeTest;
-    predicate_ = predicate;
-    multiLevel_ = false;
-  }
-
-  /**
-     @precondition current token is 1st token in the node_test production.
-     @postcondition current tok is tok after last tok of step production */
-  Step(XPath xpath, boolean multiLevel, SimpleStreamTokenizer toks) throws XPathException,
-      IOException {
-    multiLevel_ = multiLevel;
-
-    switch (toks.ttype) {
-      case '.':
-        if (toks.nextToken() == '.')
-          nodeTest_ = ParentNodeTest.INSTANCE;
-        else {
-          toks.pushBack();
-          nodeTest_ = ThisNodeTest.INSTANCE;
-        }
-        break;
-      case '*':
-        nodeTest_ = AllElementTest.INSTANCE;
-        break;
-      case '@':
-        if (toks.nextToken() != SimpleStreamTokenizer.TT_WORD)
-          throw new XPathException(xpath, "after @ in node test", toks, "name");
-        nodeTest_ = new AttrTest(toks.sval);
-        break;
-      case SimpleStreamTokenizer.TT_WORD:
-        if (toks.sval.equals("text")) {
-          if (toks.nextToken() != '(' || toks.nextToken() != ')')
-            throw new XPathException(xpath, "after text", toks, "()");
-          nodeTest_ = TextTest.INSTANCE;
-        } else
-          nodeTest_ = new ElementTest(toks.sval);
-        break;
-      default:
-        throw new XPathException(xpath, "at begininning of step", toks, "'.' or '*' or name");
+    Step(NodeTest nodeTest, BooleanExpr predicate) {
+        nodeTest_ = nodeTest;
+        predicate_ = predicate;
+        multiLevel_ = false;
     }
-    if (toks.nextToken() == '[') {
-      toks.nextToken();
-      //current token is first token in expr production
-      predicate_ = ExprFactory.createExpr(xpath, toks);
-      //current token is 1st token after expr production
-      if (toks.ttype != ']')
-        throw new XPathException(xpath, "after predicate expression", toks, "]");
-      toks.nextToken();
-    } else
-      predicate_ = TrueExpr.INSTANCE;
-    //current token is token after step production
-  }
 
-  public String toString() {
-    return nodeTest_.toString() + predicate_.toString();
-  }
+    /**
+       @precondition current token is 1st token in the node_test production.
+       @postcondition current tok is tok after last tok of step production */
+    Step(XPath xpath, boolean multiLevel, SimpleStreamTokenizer toks) throws XPathException,
+            IOException {
+        multiLevel_ = multiLevel;
 
-  /** Is this step preceeded by a '//' ? */
-  public boolean isMultiLevel() {
-    return multiLevel_;
-  }
+        switch (toks.ttype) {
+            case '.':
+                if (toks.nextToken() == '.')
+                    nodeTest_ = ParentNodeTest.INSTANCE;
+                else {
+                    toks.pushBack();
+                    nodeTest_ = ThisNodeTest.INSTANCE;
+                }
+                break;
+            case '*':
+                nodeTest_ = AllElementTest.INSTANCE;
+                break;
+            case '@':
+                if (toks.nextToken() != SimpleStreamTokenizer.TT_WORD)
+                    throw new XPathException(xpath, "after @ in node test", toks, "name");
+                nodeTest_ = new AttrTest(toks.sval);
+                break;
+            case SimpleStreamTokenizer.TT_WORD:
+                if (toks.sval.equals("text")) {
+                    if (toks.nextToken() != '(' || toks.nextToken() != ')')
+                        throw new XPathException(xpath, "after text", toks, "()");
+                    nodeTest_ = TextTest.INSTANCE;
+                } else
+                    nodeTest_ = new ElementTest(toks.sval);
+                break;
+            default:
+                throw new XPathException(xpath, "at begininning of step", toks,
+                        "'.' or '*' or name");
+        }
+        if (toks.nextToken() == '[') {
+            toks.nextToken();
+            //current token is first token in expr production
+            predicate_ = ExprFactory.createExpr(xpath, toks);
+            //current token is 1st token after expr production
+            if (toks.ttype != ']')
+                throw new XPathException(xpath, "after predicate expression", toks, "]");
+            toks.nextToken();
+        } else
+            predicate_ = TrueExpr.INSTANCE;
+        //current token is token after step production
+    }
 
-  /** Does this step evaluate to a string values (attribute values
-      or text() nodes)*/
-  public boolean isStringValue() {
-    return nodeTest_.isStringValue();
-  }
+    public String toString() {
+        return nodeTest_.toString() + predicate_.toString();
+    }
 
-  public NodeTest getNodeTest() {
-    return nodeTest_;
-  }
+    /** Is this step preceeded by a '//' ? */
+    public boolean isMultiLevel() {
+        return multiLevel_;
+    }
 
-  public BooleanExpr getPredicate() {
-    return predicate_;
-  }
+    /** Does this step evaluate to a string values (attribute values
+        or text() nodes)*/
+    public boolean isStringValue() {
+        return nodeTest_.isStringValue();
+    }
 
-  /**
-   * @link aggregationByValue
-   * @directed
-   */
-  private final NodeTest nodeTest_;
+    public NodeTest getNodeTest() {
+        return nodeTest_;
+    }
 
-  /**
-   * @link aggregationByValue
-   * @directed
-   * @label predicate
-   */
-  private final BooleanExpr predicate_;
+    public BooleanExpr getPredicate() {
+        return predicate_;
+    }
 
-  private final boolean multiLevel_;
+    /**
+     * @link aggregationByValue
+     * @directed
+     */
+    private final NodeTest nodeTest_;
+
+    /**
+     * @link aggregationByValue
+     * @directed
+     * @label predicate
+     */
+    private final BooleanExpr predicate_;
+
+    private final boolean multiLevel_;
 }
 
 // $Log: Step.java,v $

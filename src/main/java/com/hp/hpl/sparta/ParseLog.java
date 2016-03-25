@@ -19,11 +19,11 @@ package com.hp.hpl.sparta;
  */
 
 public interface ParseLog {
-  void error(String msg, String systemId, int lineNum);
+    void error(String msg, String systemId, int lineNum);
 
-  void warning(String msg, String systemId, int lineNum);
+    void warning(String msg, String systemId, int lineNum);
 
-  void note(String msg, String systemId, int lineNum);
+    void note(String msg, String systemId, int lineNum);
 }
 
 // $Log: ParseLog.java,v $

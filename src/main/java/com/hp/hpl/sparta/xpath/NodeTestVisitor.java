@@ -23,16 +23,16 @@ package com.hp.hpl.sparta.xpath;
  */
 public interface NodeTestVisitor {
 
-  void visit(AllElementTest a);
+    void visit(AllElementTest a);
 
-  void visit(ThisNodeTest a);
+    void visit(ThisNodeTest a);
 
-  void visit(ParentNodeTest a) throws XPathException;
+    void visit(ParentNodeTest a) throws XPathException;
 
-  void visit(ElementTest a);
+    void visit(ElementTest a);
 
-  void visit(AttrTest a);
+    void visit(AttrTest a);
 
-  void visit(TextTest a);
+    void visit(TextTest a);
 
 }

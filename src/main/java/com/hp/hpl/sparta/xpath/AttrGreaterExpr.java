@@ -17,23 +17,23 @@ package com.hp.hpl.sparta.xpath;
  */
 public class AttrGreaterExpr extends AttrRelationalExpr {
 
-  /**
-   * Constructor for AttrGreaterThanExpr.
-   * @param attrName
-   * @param attrValue
-   */
-  public AttrGreaterExpr(String attrName, int attrValue) {
-    super(attrName, attrValue);
-  }
+    /**
+     * Constructor for AttrGreaterThanExpr.
+     * @param attrName
+     * @param attrValue
+     */
+    public AttrGreaterExpr(String attrName, int attrValue) {
+        super(attrName, attrValue);
+    }
 
-  /**
-   * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
-   */
-  public void accept(BooleanExprVisitor visitor) throws XPathException {
-    visitor.visit(this);
-  }
+    /**
+     * @see com.hp.hpl.sparta.xpath.BooleanExpr#accept(BooleanExprVisitor)
+     */
+    public void accept(BooleanExprVisitor visitor) throws XPathException {
+        visitor.visit(this);
+    }
 
-  public String toString() {
-    return toString(">");
-  }
+    public String toString() {
+        return toString(">");
+    }
 }

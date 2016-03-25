@@ -17,19 +17,19 @@ package com.hp.hpl.sparta.xpath;
  @author Eamonn O'Brien-Strain
  */
 public abstract class TextCompareExpr extends BooleanExpr {
-  TextCompareExpr(String value) {
-    value_ = value;
-  }
+    TextCompareExpr(String value) {
+        value_ = value;
+    }
 
-  public String getValue() {
-    return value_;
-  }
+    public String getValue() {
+        return value_;
+    }
 
-  protected String toString(String op) {
-    return "[text()" + op + "\'" + value_ + "\']";
-  }
+    protected String toString(String op) {
+        return "[text()" + op + "\'" + value_ + "\']";
+    }
 
-  private final String value_;
+    private final String value_;
 
 }
 

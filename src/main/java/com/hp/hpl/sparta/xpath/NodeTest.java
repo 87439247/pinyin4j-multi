@@ -20,11 +20,11 @@ package com.hp.hpl.sparta.xpath;
  */
 public abstract class NodeTest {
 
-  public abstract void accept(Visitor visitor) throws XPathException;
+    public abstract void accept(Visitor visitor) throws XPathException;
 
-  /** Does this nodetest evaluate to a string values (attribute values
-      or text() nodes)*/
-  public abstract boolean isStringValue();
+    /** Does this nodetest evaluate to a string values (attribute values
+        or text() nodes)*/
+    public abstract boolean isStringValue();
 
 }
 

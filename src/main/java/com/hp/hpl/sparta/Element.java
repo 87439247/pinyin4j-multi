@@ -37,446 +37,449 @@ import com.hp.hpl.sparta.xpath.*;
  */
 public class Element extends Node {
 
-  static private final boolean DEBUG = false;
+    static private final boolean DEBUG = false;
 
-  public Element(String tagName) {
-    tagName_ = Sparta.intern(tagName);
-  }
-
-  Element() {}
-
-  /** Create a deep clone of this Element.  It will have the tagname
-   *  and attributes as this node.  This method will be called
-   *  recursively to copy the while subtree of child Elements and
-   *  Text nodes. */
-  public Object clone() {
-    return cloneElement(true);
-  }
-
-  /** Create a shallow clone of this Element.  It will have the
-   *  tagname and attributes as this Element but will not have child
-   *  Elements or Nodes. */
-  public Element cloneShallow() {
-    return cloneElement(false);
-  }
-
-  /** Create a clone of this node.  It will
-   *  have the tagname and attributes as this node.  If deep is
-   *  true, this method will be called recursively to copy the while
-   *  subtree of child Elements and text nodes. */
-  public Element cloneElement(boolean deep) {
-    Element result = new Element(tagName_);
-    if (attributeNames_ != null)
-      for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
-        String name = (String) i.nextElement();
-        result.setAttribute(name, (String) attributes_.get(name));
-      }
-    if (deep) for (Node n = firstChild_; n != null; n = n.getNextSibling())
-      result.appendChild((Node) n.clone());
-    return result;
-
-  }
-
-  /** @return tag as interned string.*/
-  public String getTagName() {
-    return tagName_;
-  }
-
-  public void setTagName(String tagName) {
-    tagName_ = Sparta.intern(tagName);
-    notifyObservers();
-  }
-
-  /**
-   * @return either an Element or a Text node
-   */
-  public Node getFirstChild() {
-    return firstChild_;
-  }
-
-  /**
-   * @return either an Element or a Text node
-   */
-  public Node getLastChild() {
-    return lastChild_;
-  }
-
-  /** Return enumeration of Strings */
-  public Enumeration getAttributeNames() {
-    if (attributeNames_ == null)
-      return Document.EMPTY;
-    else
-      return attributeNames_.elements();
-  }
-
-  /**
-   * @return value of attribute that has this name or null if no such attribute.
-   * WARNING! Unlike in a previous version of this API, this string is not interned
-   * therefore you must do a.equals(b) instead of a==b when comparing 
-   * attribute values.
-   */
-  public String getAttribute(String name) {
-    return attributes_ == null ? null : (String) attributes_.get(name);
-  }
-
-  /** @param name attribute name which must be non-null, non empty
-      @param value attribue value.
-      @precondition non zero-length name
-   */
-  public void setAttribute(String name, String value) {
-    if (attributes_ == null) {
-      attributes_ = new Hashtable();
-      attributeNames_ = new Vector();
+    public Element(String tagName) {
+        tagName_ = Sparta.intern(tagName);
     }
-    if (attributes_.get(name) == null) attributeNames_.addElement(name);
-    attributes_.put(name, value);
-    notifyObservers();
-    if (DEBUG) checkInvariant();
-  }
 
-  /** remove this attribute if it exists, otherwise silently do nothing. */
-  public void removeAttribute(String name) {
-    if (attributes_ == null) return;
-    attributes_.remove(name);
-    attributeNames_.removeElement(name);
-    notifyObservers();
-  }
+    Element() {}
 
-  void appendChildNoChecking(Node addedChild) {
-    if (DEBUG) checkInvariant();
-    Element oldParent = addedChild.getParentNode();
-    if (oldParent != null) oldParent.removeChildNoChecking(addedChild);
-    addedChild.insertAtEndOfLinkedList(lastChild_);
-    if (firstChild_ == null) firstChild_ = addedChild;
-    addedChild.setParentNode(this);
-    //!children_.add/*Element*/( addedChild );
-    lastChild_ = addedChild;
-    addedChild.setOwnerDocument(getOwnerDocument());
-    if (DEBUG) checkInvariant();
-  }
+    /** Create a deep clone of this Element.  It will have the tagname
+     *  and attributes as this node.  This method will be called
+     *  recursively to copy the while subtree of child Elements and
+     *  Text nodes. */
+    public Object clone() {
+        return cloneElement(true);
+    }
 
-  /** Add node as child of this element, cloning node if it is this element or
-   *  an ancestor.
-   */
-  public void appendChild(Node addedChild) {
-    if (DEBUG) checkInvariant();
-    if (!canHaveAsDescendent(addedChild)) addedChild = (Element) addedChild.clone();
-    appendChildNoChecking(addedChild);
-    notifyObservers();
-    if (DEBUG) checkInvariant();
-  }
+    /** Create a shallow clone of this Element.  It will have the
+     *  tagname and attributes as this Element but will not have child
+     *  Elements or Nodes. */
+    public Element cloneShallow() {
+        return cloneElement(false);
+    }
 
-  boolean canHaveAsDescendent(Node node) {
-    if (node == this) return false;
-    Element parent = getParentNode();
-    if (parent == null) return true;
-    return parent.canHaveAsDescendent(node);
-  }
+    /** Create a clone of this node.  It will
+     *  have the tagname and attributes as this node.  If deep is
+     *  true, this method will be called recursively to copy the while
+     *  subtree of child Elements and text nodes. */
+    public Element cloneElement(boolean deep) {
+        Element result = new Element(tagName_);
+        if (attributeNames_ != null)
+            for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
+                String name = (String) i.nextElement();
+                result.setAttribute(name, (String) attributes_.get(name));
+            }
+        if (deep) for (Node n = firstChild_; n != null; n = n.getNextSibling())
+            result.appendChild((Node) n.clone());
+        return result;
 
-  private boolean removeChildNoChecking(Node childToRemove) {
-    if (DEBUG) checkInvariant();
-    int i = 0;
-    for (Node child = firstChild_; child != null; child = child.getNextSibling()) {
-      if (child.equals(childToRemove)) {
+    }
 
-        //Fix up list endpoints if necessary
-        if (firstChild_ == child) firstChild_ = child.getNextSibling();
-        if (lastChild_ == child) lastChild_ = child.getPreviousSibling();
+    /** @return tag as interned string.*/
+    public String getTagName() {
+        return tagName_;
+    }
 
-        child.removeFromLinkedList();
-        child.setParentNode(null);
+    public void setTagName(String tagName) {
+        tagName_ = Sparta.intern(tagName);
+        notifyObservers();
+    }
 
-        child.setOwnerDocument(null);
+    /**
+     * @return either an Element or a Text node
+     */
+    public Node getFirstChild() {
+        return firstChild_;
+    }
 
+    /**
+     * @return either an Element or a Text node
+     */
+    public Node getLastChild() {
+        return lastChild_;
+    }
+
+    /** Return enumeration of Strings */
+    public Enumeration getAttributeNames() {
+        if (attributeNames_ == null)
+            return Document.EMPTY;
+        else
+            return attributeNames_.elements();
+    }
+
+    /**
+     * @return value of attribute that has this name or null if no such attribute.
+     * WARNING! Unlike in a previous version of this API, this string is not interned
+     * therefore you must do a.equals(b) instead of a==b when comparing 
+     * attribute values.
+     */
+    public String getAttribute(String name) {
+        return attributes_ == null ? null : (String) attributes_.get(name);
+    }
+
+    /** @param name attribute name which must be non-null, non empty
+        @param value attribue value.
+        @precondition non zero-length name
+     */
+    public void setAttribute(String name, String value) {
+        if (attributes_ == null) {
+            attributes_ = new Hashtable();
+            attributeNames_ = new Vector();
+        }
+        if (attributes_.get(name) == null) attributeNames_.addElement(name);
+        attributes_.put(name, value);
+        notifyObservers();
         if (DEBUG) checkInvariant();
+    }
+
+    /** remove this attribute if it exists, otherwise silently do nothing. */
+    public void removeAttribute(String name) {
+        if (attributes_ == null) return;
+        attributes_.remove(name);
+        attributeNames_.removeElement(name);
+        notifyObservers();
+    }
+
+    void appendChildNoChecking(Node addedChild) {
+        if (DEBUG) checkInvariant();
+        Element oldParent = addedChild.getParentNode();
+        if (oldParent != null) oldParent.removeChildNoChecking(addedChild);
+        addedChild.insertAtEndOfLinkedList(lastChild_);
+        if (firstChild_ == null) firstChild_ = addedChild;
+        addedChild.setParentNode(this);
+        //!children_.add/*Element*/( addedChild );
+        lastChild_ = addedChild;
+        addedChild.setOwnerDocument(getOwnerDocument());
+        if (DEBUG) checkInvariant();
+    }
+
+    /** Add node as child of this element, cloning node if it is this element or
+     *  an ancestor.
+     */
+    public void appendChild(Node addedChild) {
+        if (DEBUG) checkInvariant();
+        if (!canHaveAsDescendent(addedChild)) addedChild = (Element) addedChild.clone();
+        appendChildNoChecking(addedChild);
+        notifyObservers();
+        if (DEBUG) checkInvariant();
+    }
+
+    boolean canHaveAsDescendent(Node node) {
+        if (node == this) return false;
+        Element parent = getParentNode();
+        if (parent == null) return true;
+        return parent.canHaveAsDescendent(node);
+    }
+
+    private boolean removeChildNoChecking(Node childToRemove) {
+        if (DEBUG) checkInvariant();
+        int i = 0;
+        for (Node child = firstChild_; child != null; child = child.getNextSibling()) {
+            if (child.equals(childToRemove)) {
+
+                //Fix up list endpoints if necessary
+                if (firstChild_ == child) firstChild_ = child.getNextSibling();
+                if (lastChild_ == child) lastChild_ = child.getPreviousSibling();
+
+                child.removeFromLinkedList();
+                child.setParentNode(null);
+
+                child.setOwnerDocument(null);
+
+                if (DEBUG) checkInvariant();
+                return true;
+            }
+            ++i;
+        }
+        if (DEBUG) checkInvariant();
+        return false;
+    }
+
+    public void removeChild(Node childToRemove) throws DOMException {
+        boolean found = removeChildNoChecking(childToRemove);
+        if (!found)
+            throw new DOMException(DOMException.NOT_FOUND_ERR, "Cannot find " + childToRemove
+                    + " in " + this);
+        notifyObservers();
+        if (DEBUG) checkInvariant();
+    }
+
+    /** Replace oldChild with newChild.
+     *  @throws DOMException if oldChild object is not a child.
+     *    */
+    public void replaceChild(Element newChild, Node oldChild) throws DOMException {
+        replaceChild_(newChild, oldChild);
+        notifyObservers();
+    }
+
+    /** Replace oldChild with newChild.
+     *  @throws DOMException if oldChild object is not a child.
+     *    */
+    public void replaceChild(Text newChild, Node oldChild) throws DOMException {
+        replaceChild_(newChild, oldChild);
+        notifyObservers();
+    }
+
+    private void replaceChild_(Node newChild, Node oldChild) throws DOMException {
+        int i = 0;
+        for (Node child = firstChild_; child != null; child = child.getNextSibling()) {
+            if (child == oldChild) {
+
+                //Fix up list endpoints if necessary
+                if (firstChild_ == oldChild) firstChild_ = newChild;
+                if (lastChild_ == oldChild) lastChild_ = newChild;
+
+                //Make oldChild's neighbouring siblings point to newChild
+                oldChild.replaceInLinkedList(newChild);
+
+                //Fix parent pointers
+                newChild.setParentNode(this);
+                oldChild.setParentNode(null);
+
+                return;
+            }
+            ++i;
+        }
+        throw new DOMException(DOMException.NOT_FOUND_ERR, "Cannot find " + oldChild + " in "
+                + this);
+    }
+
+    /** Accumlate text nodes hierarchically. */
+    void toString(Writer writer) throws IOException {
+        for (Node i = firstChild_; i != null; i = i.getNextSibling())
+            i.toString(writer);
+    }
+
+    /** Write XML representation to character stream. */
+    public void toXml(Writer writer) throws IOException {
+        writer.write("<" + tagName_);
+        if (attributeNames_ != null)
+            for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
+                String name = (String) i.nextElement();
+                String value = (String) attributes_.get(name);
+                writer.write(" " + name + "=\"");
+                htmlEncode(writer, value);
+                writer.write("\"");
+            }
+        if (firstChild_ == null)
+            writer.write("/>");
+        else {
+            writer.write(">");
+            for (Node i = firstChild_; i != null; i = i.getNextSibling())
+                i.toXml(writer);
+            writer.write("</" + tagName_ + ">");
+        }
+    }
+
+    private XPathVisitor visitor(String xpath, boolean expectStringValue) throws XPathException {
+        XPath parseTree = XPath.get(xpath);
+        if (parseTree.isStringValue() != expectStringValue) {
+            String msg =
+                    expectStringValue
+                            ? "evaluates to element not string"
+                            : "evaluates to string not element";
+            throw new XPathException(parseTree, "\"" + parseTree + "\" evaluates to " + msg);
+        }
+        return new XPathVisitor(this, parseTree);
+    }
+
+    /** Select all the elements that match the relative XPath
+        expression with respect to this element. */
+    public Enumeration xpathSelectElements(String xpath) throws ParseException {
+        try {
+
+            if (DEBUG) {
+                Document doc = getOwnerDocument();
+                if (doc != null && this == doc.getDocumentElement()) {
+                    XPath parseTree = XPath.get(xpath);
+                    doc.monitor(parseTree);
+                }
+            }
+
+            return visitor(xpath, false).getResultEnumeration();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Select all the strings that match the relative XPath
+        expression with respect to this element. */
+    public Enumeration xpathSelectStrings(String xpath) throws ParseException {
+        try {
+
+            return visitor(xpath, true).getResultEnumeration();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Make sure this XPath exists, creating nodes if necessary,
+     *  returning true if any nodes created.  Xpath must of the type that
+     *  returns an element (not a string).
+     *  */
+    public boolean xpathEnsure(String xpath) throws ParseException {
+        try {
+
+            //Quick exit for common case
+            if (xpathSelectElement(xpath) != null) return false;
+
+            //Split XPath into parent steps and last step
+            final XPath parseTree = XPath.get(xpath);
+            int stepCount = 0;
+            for (Enumeration i = parseTree.getSteps(); i.hasMoreElements();) {
+                i.nextElement();
+                ++stepCount;
+            }
+            Step[] parentSteps = new Step[stepCount - 1];
+            Enumeration i = parseTree.getSteps();
+            for (int j = 0; j < parentSteps.length; ++j)
+                parentSteps[j] = (Step) i.nextElement();
+            Step lastStep = (Step) i.nextElement();
+
+            Element parent;
+            if (parentSteps.length == 0) {
+                parent = this;
+            } else {
+                String parentXPath = XPath.get(parseTree.isAbsolute(), parentSteps).toString();
+                xpathEnsure(parentXPath.toString()); //recursion
+                parent = xpathSelectElement(parentXPath);
+            }
+
+            Element newChild = makeMatching(parent, lastStep, xpath);
+            parent.appendChildNoChecking(newChild);
+            return true;
+
+        } catch (XPathException e) {
+            throw new ParseException(xpath, e);
+        }
+    }
+
+    /** Select the first element that matches the relative XPath
+        expression with respect to this element, or null if
+        there is no match.
+    
+        @todo make more efficient by short-circuiting the search.*/
+    public Element xpathSelectElement(String xpath) throws ParseException {
+        try {
+
+            if (DEBUG) {
+                Document doc = getOwnerDocument();
+                if (doc != null && this == doc.getDocumentElement()) {
+                    XPath parseTree = XPath.get(xpath);
+                    doc.monitor(parseTree);
+                }
+            }
+            return visitor(xpath, false).getFirstResultElement();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** Select the first element that matches the relative XPath
+        expression with respect to this element, or null if
+        there is no match. */
+    public String xpathSelectString(String xpath) throws ParseException {
+        try {
+
+            return visitor(xpath, true).getFirstResultString();
+
+        } catch (XPathException e) {
+            throw new ParseException("XPath problem", e);
+        }
+    }
+
+    /** To be equal elements must have the same tagname, they must
+     *  have the same children (applying equals recursivly) in the
+     *  same order and they must have the same attributes in any
+     *  order.  Elements can be equal even if they are in different
+     *  documents, have different parents, have different siblings, or
+     *  have different annotations.
+     *   */
+    public boolean equals(Object thatO) {
+
+        //Do cheap tests first
+        if (this == thatO) return true;
+        if (!(thatO instanceof Element)) return false;
+        Element that = (Element) thatO;
+        if (!this.tagName_.equals(that.tagName_)) return false;
+        //!if( this.children_.size() != that.children_.size() )
+        //!    return false;
+        int thisAttrCount = this.attributes_ == null ? 0 : this.attributes_.size();
+        int thatAttrCount = that.attributes_ == null ? 0 : that.attributes_.size();
+        if (thisAttrCount != thatAttrCount) return false;
+
+        //Compare attributes ignoring order (we already know the
+        //number is the same)
+        if (attributes_ != null) for (Enumeration i = attributes_.keys(); i.hasMoreElements();) {
+            String key = (String) i.nextElement();
+            String thisValue = (String) this.attributes_.get(key);
+            //non-null
+            String thatValue = (String) that.attributes_.get(key);
+            //maybe null
+            if (!thisValue.equals(thatValue)) return false;
+        }
+
+        //Compare children in order (we already know the number is the same)
+        Node thisChild = this.firstChild_;
+        Node thatChild = that.firstChild_;
+        while (thisChild != null) {
+            if (!thisChild.equals(thatChild)) return false;
+            thisChild = thisChild.getNextSibling();
+            thatChild = thatChild.getNextSibling();
+        }
+
         return true;
-      }
-      ++i;
     }
-    if (DEBUG) checkInvariant();
-    return false;
-  }
 
-  public void removeChild(Node childToRemove) throws DOMException {
-    boolean found = removeChildNoChecking(childToRemove);
-    if (!found)
-      throw new DOMException(DOMException.NOT_FOUND_ERR, "Cannot find " + childToRemove + " in "
-          + this);
-    notifyObservers();
-    if (DEBUG) checkInvariant();
-  }
+    /** Called whenever cached version of hashCode needs to be regenerated. */
+    protected int computeHashCode() {
+        int hash = tagName_.hashCode();
 
-  /** Replace oldChild with newChild.
-   *  @throws DOMException if oldChild object is not a child.
-   *    */
-  public void replaceChild(Element newChild, Node oldChild) throws DOMException {
-    replaceChild_(newChild, oldChild);
-    notifyObservers();
-  }
-
-  /** Replace oldChild with newChild.
-   *  @throws DOMException if oldChild object is not a child.
-   *    */
-  public void replaceChild(Text newChild, Node oldChild) throws DOMException {
-    replaceChild_(newChild, oldChild);
-    notifyObservers();
-  }
-
-  private void replaceChild_(Node newChild, Node oldChild) throws DOMException {
-    int i = 0;
-    for (Node child = firstChild_; child != null; child = child.getNextSibling()) {
-      if (child == oldChild) {
-
-        //Fix up list endpoints if necessary
-        if (firstChild_ == oldChild) firstChild_ = newChild;
-        if (lastChild_ == oldChild) lastChild_ = newChild;
-
-        //Make oldChild's neighbouring siblings point to newChild
-        oldChild.replaceInLinkedList(newChild);
-
-        //Fix parent pointers
-        newChild.setParentNode(this);
-        oldChild.setParentNode(null);
-
-        return;
-      }
-      ++i;
-    }
-    throw new DOMException(DOMException.NOT_FOUND_ERR, "Cannot find " + oldChild + " in " + this);
-  }
-
-  /** Accumlate text nodes hierarchically. */
-  void toString(Writer writer) throws IOException {
-    for (Node i = firstChild_; i != null; i = i.getNextSibling())
-      i.toString(writer);
-  }
-
-  /** Write XML representation to character stream. */
-  public void toXml(Writer writer) throws IOException {
-    writer.write("<" + tagName_);
-    if (attributeNames_ != null)
-      for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
-        String name = (String) i.nextElement();
-        String value = (String) attributes_.get(name);
-        writer.write(" " + name + "=\"");
-        htmlEncode(writer, value);
-        writer.write("\"");
-      }
-    if (firstChild_ == null)
-      writer.write("/>");
-    else {
-      writer.write(">");
-      for (Node i = firstChild_; i != null; i = i.getNextSibling())
-        i.toXml(writer);
-      writer.write("</" + tagName_ + ">");
-    }
-  }
-
-  private XPathVisitor visitor(String xpath, boolean expectStringValue) throws XPathException {
-    XPath parseTree = XPath.get(xpath);
-    if (parseTree.isStringValue() != expectStringValue) {
-      String msg =
-          expectStringValue ? "evaluates to element not string" : "evaluates to string not element";
-      throw new XPathException(parseTree, "\"" + parseTree + "\" evaluates to " + msg);
-    }
-    return new XPathVisitor(this, parseTree);
-  }
-
-  /** Select all the elements that match the relative XPath
-      expression with respect to this element. */
-  public Enumeration xpathSelectElements(String xpath) throws ParseException {
-    try {
-
-      if (DEBUG) {
-        Document doc = getOwnerDocument();
-        if (doc != null && this == doc.getDocumentElement()) {
-          XPath parseTree = XPath.get(xpath);
-          doc.monitor(parseTree);
+        if (attributes_ != null) for (Enumeration i = attributes_.keys(); i.hasMoreElements();) {
+            String key = (String) i.nextElement();
+            hash = 31 * hash + key.hashCode();
+            String value = (String) attributes_.get(key);
+            hash = 31 * hash + value.hashCode();
         }
-      }
 
-      return visitor(xpath, false).getResultEnumeration();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Select all the strings that match the relative XPath
-      expression with respect to this element. */
-  public Enumeration xpathSelectStrings(String xpath) throws ParseException {
-    try {
-
-      return visitor(xpath, true).getResultEnumeration();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Make sure this XPath exists, creating nodes if necessary,
-   *  returning true if any nodes created.  Xpath must of the type that
-   *  returns an element (not a string).
-   *  */
-  public boolean xpathEnsure(String xpath) throws ParseException {
-    try {
-
-      //Quick exit for common case
-      if (xpathSelectElement(xpath) != null) return false;
-
-      //Split XPath into parent steps and last step
-      final XPath parseTree = XPath.get(xpath);
-      int stepCount = 0;
-      for (Enumeration i = parseTree.getSteps(); i.hasMoreElements();) {
-        i.nextElement();
-        ++stepCount;
-      }
-      Step[] parentSteps = new Step[stepCount - 1];
-      Enumeration i = parseTree.getSteps();
-      for (int j = 0; j < parentSteps.length; ++j)
-        parentSteps[j] = (Step) i.nextElement();
-      Step lastStep = (Step) i.nextElement();
-
-      Element parent;
-      if (parentSteps.length == 0) {
-        parent = this;
-      } else {
-        String parentXPath = XPath.get(parseTree.isAbsolute(), parentSteps).toString();
-        xpathEnsure(parentXPath.toString()); //recursion
-        parent = xpathSelectElement(parentXPath);
-      }
-
-      Element newChild = makeMatching(parent, lastStep, xpath);
-      parent.appendChildNoChecking(newChild);
-      return true;
-
-    } catch (XPathException e) {
-      throw new ParseException(xpath, e);
-    }
-  }
-
-  /** Select the first element that matches the relative XPath
-      expression with respect to this element, or null if
-      there is no match.
-  
-      @todo make more efficient by short-circuiting the search.*/
-  public Element xpathSelectElement(String xpath) throws ParseException {
-    try {
-
-      if (DEBUG) {
-        Document doc = getOwnerDocument();
-        if (doc != null && this == doc.getDocumentElement()) {
-          XPath parseTree = XPath.get(xpath);
-          doc.monitor(parseTree);
-        }
-      }
-      return visitor(xpath, false).getFirstResultElement();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** Select the first element that matches the relative XPath
-      expression with respect to this element, or null if
-      there is no match. */
-  public String xpathSelectString(String xpath) throws ParseException {
-    try {
-
-      return visitor(xpath, true).getFirstResultString();
-
-    } catch (XPathException e) {
-      throw new ParseException("XPath problem", e);
-    }
-  }
-
-  /** To be equal elements must have the same tagname, they must
-   *  have the same children (applying equals recursivly) in the
-   *  same order and they must have the same attributes in any
-   *  order.  Elements can be equal even if they are in different
-   *  documents, have different parents, have different siblings, or
-   *  have different annotations.
-   *   */
-  public boolean equals(Object thatO) {
-
-    //Do cheap tests first
-    if (this == thatO) return true;
-    if (!(thatO instanceof Element)) return false;
-    Element that = (Element) thatO;
-    if (!this.tagName_.equals(that.tagName_)) return false;
-    //!if( this.children_.size() != that.children_.size() )
-    //!    return false;
-    int thisAttrCount = this.attributes_ == null ? 0 : this.attributes_.size();
-    int thatAttrCount = that.attributes_ == null ? 0 : that.attributes_.size();
-    if (thisAttrCount != thatAttrCount) return false;
-
-    //Compare attributes ignoring order (we already know the
-    //number is the same)
-    if (attributes_ != null) for (Enumeration i = attributes_.keys(); i.hasMoreElements();) {
-      String key = (String) i.nextElement();
-      String thisValue = (String) this.attributes_.get(key);
-      //non-null
-      String thatValue = (String) that.attributes_.get(key);
-      //maybe null
-      if (!thisValue.equals(thatValue)) return false;
+        for (Node i = firstChild_; i != null; i = i.getNextSibling())
+            hash = 31 * hash + i.hashCode();
+        return hash;
     }
 
-    //Compare children in order (we already know the number is the same)
-    Node thisChild = this.firstChild_;
-    Node thatChild = that.firstChild_;
-    while (thisChild != null) {
-      if (!thisChild.equals(thatChild)) return false;
-      thisChild = thisChild.getNextSibling();
-      thatChild = thatChild.getNextSibling();
-    }
-
-    return true;
-  }
-
-  /** Called whenever cached version of hashCode needs to be regenerated. */
-  protected int computeHashCode() {
-    int hash = tagName_.hashCode();
-
-    if (attributes_ != null) for (Enumeration i = attributes_.keys(); i.hasMoreElements();) {
-      String key = (String) i.nextElement();
-      hash = 31 * hash + key.hashCode();
-      String value = (String) attributes_.get(key);
-      hash = 31 * hash + value.hashCode();
-    }
-
-    for (Node i = firstChild_; i != null; i = i.getNextSibling())
-      hash = 31 * hash + i.hashCode();
-    return hash;
-  }
-
-  private void checkInvariant() {
-    if (DEBUG) {
-      if (tagName_ != Sparta.intern(tagName_)) throw new Error("tagname not interned");
-      if (attributeNames_ != null)
-        for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
-          String name = (String) i.nextElement();
-          if (name.indexOf(' ') != -1) throw new Error("Bad attribute " + name);
+    private void checkInvariant() {
+        if (DEBUG) {
+            if (tagName_ != Sparta.intern(tagName_)) throw new Error("tagname not interned");
+            if (attributeNames_ != null)
+                for (Enumeration i = attributeNames_.elements(); i.hasMoreElements();) {
+                    String name = (String) i.nextElement();
+                    if (name.indexOf(' ') != -1) throw new Error("Bad attribute " + name);
+                }
         }
     }
-  }
 
-  /**
-   * @link aggregation
-   * @label firstChild
-   */
-  private Node firstChild_ = null;
+    /**
+     * @link aggregation
+     * @label firstChild
+     */
+    private Node firstChild_ = null;
 
-  /**
-   * @link aggregation
-   * @label lastChild
-   */
-  private Node lastChild_ = null;
+    /**
+     * @link aggregation
+     * @label lastChild
+     */
+    private Node lastChild_ = null;
 
-  //Profiling found that these hashtables were using a lot of memory, so create them lazily
+    //Profiling found that these hashtables were using a lot of memory, so create them lazily
 
-  private Hashtable attributes_ = null; //create on first setAttribute
-  private Vector attributeNames_ = null; //create on first setAttribute
-  private String tagName_ = null;
+    private Hashtable attributes_ = null; //create on first setAttribute
+    private Vector attributeNames_ = null; //create on first setAttribute
+    private String tagName_ = null;
 
 }
 

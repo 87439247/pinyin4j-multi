@@ -20,21 +20,21 @@ import com.hp.hpl.sparta.Sparta;
  */
 public abstract class AttrCompareExpr extends AttrExpr {
 
-  AttrCompareExpr(String attrName, String attrValue) {
-    super(attrName);
-    attrValue_ = Sparta.intern(attrValue);
-  }
+    AttrCompareExpr(String attrName, String attrValue) {
+        super(attrName);
+        attrValue_ = Sparta.intern(attrValue);
+    }
 
-  /** Result is an interned string for faster comparison.*/
-  public String getAttrValue() {
-    return attrValue_;
-  }
+    /** Result is an interned string for faster comparison.*/
+    public String getAttrValue() {
+        return attrValue_;
+    }
 
-  protected String toString(String op) {
-    return "[" + super.toString() + op + "\'" + attrValue_ + "\']";
-  }
+    protected String toString(String op) {
+        return "[" + super.toString() + op + "\'" + attrValue_ + "\']";
+    }
 
-  private final String attrValue_;
+    private final String attrValue_;
 
 }
 

@@ -25,113 +25,113 @@ import java.util.Enumeration;
 
 public class Text extends Node {
 
-  /**
-   * Create with an initial character as its data.  This can be added to later.
-   */
-  public Text(String data) {
-    text_ = new StringBuffer(data);
-  }
-
-  /**
-   * Create with an initial character as its data.  This can be added to later.
-   */
-  public Text(char ch) {
-    text_ = new StringBuffer();
-    text_.append(ch);
-  }
-
-  /** Deep clone: returns Text node with copy of this ones data. */
-  public Object clone() {
-    return new Text(text_.toString());
-  }
-
-  public void appendData(String s) {
-    text_.append(s);
-    notifyObservers();
-  }
-
-  public void appendData(char ch) {
-    text_.append(ch);
-    notifyObservers();
-  }
-
-  /**
-   * @param cbuf characters, some of which are to be appended to the text data
-   * @param offset the first index in cbuf to copy
-   * @param len the number of characters to copy
-   */
-  public void appendData(char[] cbuf, int offset, int len) {
-    text_.append(cbuf, offset, len);
-    notifyObservers();
-  }
-
-  public String getData() {
-    return text_.toString();
-  }
-
-  public void setData(String data) {
-    text_ = new StringBuffer(data);
-    notifyObservers();
-  }
-
-  void toXml(Writer writer) throws IOException {
-    //System.out.println("Text.toXml "+text_.toString());
-    String s = text_.toString();
-    if (s.length() < 50)
-      //short
-      htmlEncode(writer, s);
-    else {
-      //long
-      writer.write("<![CDATA[");
-      writer.write(s);
-      writer.write("]]>");
+    /**
+     * Create with an initial character as its data.  This can be added to later.
+     */
+    public Text(String data) {
+        text_ = new StringBuffer(data);
     }
-  }
 
-  void toString(Writer writer) throws IOException {
-    writer.write(text_.toString());
-  }
+    /**
+     * Create with an initial character as its data.  This can be added to later.
+     */
+    public Text(char ch) {
+        text_ = new StringBuffer();
+        text_.append(ch);
+    }
 
-  /** Not implemented. */
-  public Enumeration xpathSelectElements(String xpath) {
-    throw new Error("Sorry, not implemented");
-  }
+    /** Deep clone: returns Text node with copy of this ones data. */
+    public Object clone() {
+        return new Text(text_.toString());
+    }
+
+    public void appendData(String s) {
+        text_.append(s);
+        notifyObservers();
+    }
+
+    public void appendData(char ch) {
+        text_.append(ch);
+        notifyObservers();
+    }
+
+    /**
+     * @param cbuf characters, some of which are to be appended to the text data
+     * @param offset the first index in cbuf to copy
+     * @param len the number of characters to copy
+     */
+    public void appendData(char[] cbuf, int offset, int len) {
+        text_.append(cbuf, offset, len);
+        notifyObservers();
+    }
+
+    public String getData() {
+        return text_.toString();
+    }
+
+    public void setData(String data) {
+        text_ = new StringBuffer(data);
+        notifyObservers();
+    }
+
+    void toXml(Writer writer) throws IOException {
+        //System.out.println("Text.toXml "+text_.toString());
+        String s = text_.toString();
+        if (s.length() < 50)
+            //short
+            htmlEncode(writer, s);
+        else {
+            //long
+            writer.write("<![CDATA[");
+            writer.write(s);
+            writer.write("]]>");
+        }
+    }
+
+    void toString(Writer writer) throws IOException {
+        writer.write(text_.toString());
+    }
+
+    /** Not implemented. */
+    public Enumeration xpathSelectElements(String xpath) {
+        throw new Error("Sorry, not implemented");
+    }
 
 
-  /** Not implemented */
-  public Enumeration xpathSelectStrings(String xpath) {
-    throw new Error("Sorry, not implemented");
-  }
+    /** Not implemented */
+    public Enumeration xpathSelectStrings(String xpath) {
+        throw new Error("Sorry, not implemented");
+    }
 
-  /** Not implemented. */
-  public Element xpathSelectElement(String xpath) {
-    throw new Error("Sorry, not implemented");
-  }
+    /** Not implemented. */
+    public Element xpathSelectElement(String xpath) {
+        throw new Error("Sorry, not implemented");
+    }
 
-  /** Not implemented. */
-  public String xpathSelectString(String xpath) {
-    throw new Error("Sorry, not implemented");
-  }
+    /** Not implemented. */
+    public String xpathSelectString(String xpath) {
+        throw new Error("Sorry, not implemented");
+    }
 
-  /**   Text nodes can be equal even if they are in different documents,
-   *    different parents, different siblings, or different annotations.
-   *    They are equal IFF their string data is equal
-   *     */
-  public boolean equals(Object thatO) {
+    /**   Text nodes can be equal even if they are in different documents,
+     *    different parents, different siblings, or different annotations.
+     *    They are equal IFF their string data is equal
+     *     */
+    public boolean equals(Object thatO) {
 
-    //Do cheap tests first
-    if (this == thatO) return true;
-    if (!(thatO instanceof Text)) return false;
-    Text that = (Text) thatO;
-    return this.text_.toString().equals(that.text_.toString());
-  }
+        //Do cheap tests first
+        if (this == thatO) return true;
+        if (!(thatO instanceof Text)) return false;
+        Text that = (Text) thatO;
+        return this.text_.toString().equals(that.text_.toString());
+    }
 
-  /** Called whenever cached version of hashCode needs to be regenerated. */
-  protected int computeHashCode() {
-    return text_.toString().hashCode();
-  }
+    /** Called whenever cached version of hashCode needs to be regenerated. */
+    protected int computeHashCode() {
+        return text_.toString().hashCode();
+    }
 
-  private StringBuffer text_;
+    private StringBuffer text_;
 }
 
 // $Log: Text.java,v $

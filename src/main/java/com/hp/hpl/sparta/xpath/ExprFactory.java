@@ -23,102 +23,111 @@ import java.io.*;
  * @stereotype factory */
 public class ExprFactory {
 
-  /** @precondition current token is first token in expr production.
-      @postcondition current token is first token after expr production */
-  static BooleanExpr createExpr(XPath xpath, SimpleStreamTokenizer toks) throws XPathException,
-      IOException {
-    switch (toks.ttype) {
+    /** @precondition current token is first token in expr production.
+        @postcondition current token is first token after expr production */
+    static BooleanExpr createExpr(XPath xpath, SimpleStreamTokenizer toks) throws XPathException,
+            IOException {
+        switch (toks.ttype) {
 
-      default:
-        throw new XPathException(xpath, "at beginning of expression", toks, "@, number, or text()");
+            default:
+                throw new XPathException(xpath, "at beginning of expression", toks,
+                        "@, number, or text()");
 
-      case SimpleStreamTokenizer.TT_NUMBER:
-        int position = (int) toks.nval;
-        toks.nextToken();
-        return new PositionEqualsExpr(position);
+            case SimpleStreamTokenizer.TT_NUMBER:
+                int position = (int) toks.nval;
+                toks.nextToken();
+                return new PositionEqualsExpr(position);
 
-      case '@':
+            case '@':
 
-        if (toks.nextToken() != SimpleStreamTokenizer.TT_WORD)
-          throw new XPathException(xpath, "after @", toks, "name");
-        String name = toks.sval;
-        String value;
-        int valueN;
-        switch (toks.nextToken()) {
-          case '=':
-            toks.nextToken();
-            if (toks.ttype != '\"' && toks.ttype != '\'')
-              throw new XPathException(xpath, "right hand side of equals", toks, "quoted string");
-            value = toks.sval;
-            toks.nextToken();
-            return new AttrEqualsExpr(name, value);
-          case '<':
-            toks.nextToken();
-            if (toks.ttype == '\"' || toks.ttype == '\'') {
-              // use jdk1.1 API to make the code work with PersonalJava
-              // valueN = Double.parseDouble(toks.sval);
-              valueN = Integer.parseInt(toks.sval);
-            } else if (toks.ttype == SimpleStreamTokenizer.TT_NUMBER)
-              valueN = toks.nval;
-            else
-              throw new XPathException(xpath, "right hand side of less-than", toks,
-                  "quoted string or number");
-            toks.nextToken();
-            return new AttrLessExpr(name, valueN);
-          case '>':
-            toks.nextToken();
-            if (toks.ttype == '\"' || toks.ttype == '\'') {
-              // use jdk1.1 API to make the code work with PersonalJava
-              // valueN = Double.parseDouble(toks.sval);
-              valueN = Integer.parseInt(toks.sval);
-            } else if (toks.ttype == SimpleStreamTokenizer.TT_NUMBER)
-              valueN = toks.nval;
-            else
-              throw new XPathException(xpath, "right hand side of greater-than", toks,
-                  "quoted string or number");
-            toks.nextToken();
-            return new AttrGreaterExpr(name, valueN);
-          case '!':
-            toks.nextToken();
-            if (toks.ttype != '=') throw new XPathException(xpath, "after !", toks, "=");
-            toks.nextToken();
-            if (toks.ttype != '\"' && toks.ttype != '\'')
-              throw new XPathException(xpath, "right hand side of !=", toks, "quoted string");
-            value = toks.sval;
-            toks.nextToken();
-            return new AttrNotEqualsExpr(name, value);
-          default:
-            return new AttrExistsExpr(name);
-        }
-      case SimpleStreamTokenizer.TT_WORD:
-        if (!toks.sval.equals("text"))
-          throw new XPathException(xpath, "at beginning of expression", toks, "text()");
+                if (toks.nextToken() != SimpleStreamTokenizer.TT_WORD)
+                    throw new XPathException(xpath, "after @", toks, "name");
+                String name = toks.sval;
+                String value;
+                int valueN;
+                switch (toks.nextToken()) {
+                    case '=':
+                        toks.nextToken();
+                        if (toks.ttype != '\"' && toks.ttype != '\'')
+                            throw new XPathException(xpath, "right hand side of equals", toks,
+                                    "quoted string");
+                        value = toks.sval;
+                        toks.nextToken();
+                        return new AttrEqualsExpr(name, value);
+                    case '<':
+                        toks.nextToken();
+                        if (toks.ttype == '\"' || toks.ttype == '\'') {
+                            // use jdk1.1 API to make the code work with PersonalJava
+                            // valueN = Double.parseDouble(toks.sval);
+                            valueN = Integer.parseInt(toks.sval);
+                        } else if (toks.ttype == SimpleStreamTokenizer.TT_NUMBER)
+                            valueN = toks.nval;
+                        else
+                            throw new XPathException(xpath, "right hand side of less-than", toks,
+                                    "quoted string or number");
+                        toks.nextToken();
+                        return new AttrLessExpr(name, valueN);
+                    case '>':
+                        toks.nextToken();
+                        if (toks.ttype == '\"' || toks.ttype == '\'') {
+                            // use jdk1.1 API to make the code work with PersonalJava
+                            // valueN = Double.parseDouble(toks.sval);
+                            valueN = Integer.parseInt(toks.sval);
+                        } else if (toks.ttype == SimpleStreamTokenizer.TT_NUMBER)
+                            valueN = toks.nval;
+                        else
+                            throw new XPathException(xpath, "right hand side of greater-than",
+                                    toks, "quoted string or number");
+                        toks.nextToken();
+                        return new AttrGreaterExpr(name, valueN);
+                    case '!':
+                        toks.nextToken();
+                        if (toks.ttype != '=')
+                            throw new XPathException(xpath, "after !", toks, "=");
+                        toks.nextToken();
+                        if (toks.ttype != '\"' && toks.ttype != '\'')
+                            throw new XPathException(xpath, "right hand side of !=", toks,
+                                    "quoted string");
+                        value = toks.sval;
+                        toks.nextToken();
+                        return new AttrNotEqualsExpr(name, value);
+                    default:
+                        return new AttrExistsExpr(name);
+                }
+            case SimpleStreamTokenizer.TT_WORD:
+                if (!toks.sval.equals("text"))
+                    throw new XPathException(xpath, "at beginning of expression", toks, "text()");
 
-        if (toks.nextToken() != '(') throw new XPathException(xpath, "after text", toks, "(");
-        if (toks.nextToken() != ')') throw new XPathException(xpath, "after text(", toks, ")");
-        String tValue;
-        switch (toks.nextToken()) {
-          case '=':
-            toks.nextToken();
-            if (toks.ttype != '\"' && toks.ttype != '\'')
-              throw new XPathException(xpath, "right hand side of equals", toks, "quoted string");
-            tValue = toks.sval;
-            toks.nextToken();
-            return new TextEqualsExpr(tValue);
-          case '!':
-            toks.nextToken();
-            if (toks.ttype != '=') throw new XPathException(xpath, "after !", toks, "=");
-            toks.nextToken();
-            if (toks.ttype != '\"' && toks.ttype != '\'')
-              throw new XPathException(xpath, "right hand side of !=", toks, "quoted string");
-            tValue = toks.sval;
-            toks.nextToken();
-            return new TextNotEqualsExpr(tValue);
-          default:
-            return TextExistsExpr.INSTANCE;
+                if (toks.nextToken() != '(')
+                    throw new XPathException(xpath, "after text", toks, "(");
+                if (toks.nextToken() != ')')
+                    throw new XPathException(xpath, "after text(", toks, ")");
+                String tValue;
+                switch (toks.nextToken()) {
+                    case '=':
+                        toks.nextToken();
+                        if (toks.ttype != '\"' && toks.ttype != '\'')
+                            throw new XPathException(xpath, "right hand side of equals", toks,
+                                    "quoted string");
+                        tValue = toks.sval;
+                        toks.nextToken();
+                        return new TextEqualsExpr(tValue);
+                    case '!':
+                        toks.nextToken();
+                        if (toks.ttype != '=')
+                            throw new XPathException(xpath, "after !", toks, "=");
+                        toks.nextToken();
+                        if (toks.ttype != '\"' && toks.ttype != '\'')
+                            throw new XPathException(xpath, "right hand side of !=", toks,
+                                    "quoted string");
+                        tValue = toks.sval;
+                        toks.nextToken();
+                        return new TextNotEqualsExpr(tValue);
+                    default:
+                        return TextExistsExpr.INSTANCE;
+                }
         }
     }
-  }
 
 }
 

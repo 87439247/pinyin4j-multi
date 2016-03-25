@@ -18,19 +18,19 @@ package com.hp.hpl.sparta.xpath;
  @author Eamonn O'Brien-Strain
  */
 public abstract class AttrExpr extends BooleanExpr {
-  AttrExpr(String attrName) {
-    attrName_ = attrName;
-  }
+    AttrExpr(String attrName) {
+        attrName_ = attrName;
+    }
 
-  public String getAttrName() {
-    return attrName_;
-  }
+    public String getAttrName() {
+        return attrName_;
+    }
 
-  public String toString() {
-    return "@" + attrName_;
-  }
+    public String toString() {
+        return "@" + attrName_;
+    }
 
-  private final String attrName_;
+    private final String attrName_;
 }
 
 // $Log: AttrExpr.java,v $

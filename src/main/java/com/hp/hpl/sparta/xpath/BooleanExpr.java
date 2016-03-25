@@ -18,7 +18,7 @@ package com.hp.hpl.sparta.xpath;
  @author Eamonn O'Brien-Strain
  */
 public abstract class BooleanExpr {
-  public abstract void accept(BooleanExprVisitor visitor) throws XPathException;
+    public abstract void accept(BooleanExprVisitor visitor) throws XPathException;
 
 }
 
