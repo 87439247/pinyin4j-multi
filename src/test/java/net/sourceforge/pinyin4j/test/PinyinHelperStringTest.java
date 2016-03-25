@@ -1,11 +1,12 @@
 package net.sourceforge.pinyin4j.test;
 
-import junit.framework.TestCase;
 import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.multipinyin.MultiPinyinConfig;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,14 +17,16 @@ import java.io.FileWriter;
  * Created by 刘一波 on 16/3/4.
  * E-Mail:yibo.liu@tqmall.com
  */
-public class Q extends TestCase {
+public class PinyinHelperStringTest {
     static HanyuPinyinOutputFormat outputFormat = new HanyuPinyinOutputFormat();
 
     static {
         outputFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        outputFormat.setCaseType(HanyuPinyinCaseType.UPPERCASE);
         outputFormat.setVCharType(HanyuPinyinVCharType.WITH_V);
     }
 
+    @Test
     public void testMulti() throws Exception {
         MultiPinyinConfig.multiPinyinPath = "/Users/yiboliu/my_multi_pinyin.txt";
         System.out.println(PinyinHelper.toHanYuPinyinString("呵呵...", outputFormat, ";", true));
@@ -64,10 +67,11 @@ public class Q extends TestCase {
                 false));
         System.out.println(PinyinHelper.toHanYuPinyinStringFirstLetter("我艹", outputFormat, ",",
                 false));
-        System.out.println(PinyinHelper.toHanYuPinyinStringFirstLetter("宝马奔驰", outputFormat, ",",
+        System.out.println(PinyinHelper.toHanYuPinyinStringFirstLetter("宝马奔驰", outputFormat, "",
                 false));
     }
 
+    @Test
     public void testMore() throws Exception {
         BufferedReader bufferedReader =
                 new BufferedReader(new FileReader("/Users/yiboliu/pinyin.txt"));

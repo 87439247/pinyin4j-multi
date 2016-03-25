@@ -14,7 +14,10 @@
     <version>1.0.0</version>
 
     <name>Chinese to Pinyin Multi Tone</name>
-    <description>Support Chinese character (both Simplified and Tranditional) to most popular Pinyin systems, including Hanyu Pinyin, Tongyong Pinyin, Wade-Giles, MPS2, Yale and Gwoyeu Romatzyh. Support multiple pronounciations and customized output.</description>
+    <description>Support Chinese character (both Simplified and Tranditional) to most popular Pinyin systems, including
+        Hanyu Pinyin, Tongyong Pinyin, Wade-Giles, MPS2, Yale and Gwoyeu Romatzyh. Support multiple pronounciations and
+        customized output.
+    </description>
     <url>https://github.com/obiteaaron/pinyin4j-multi</url>
 
 
