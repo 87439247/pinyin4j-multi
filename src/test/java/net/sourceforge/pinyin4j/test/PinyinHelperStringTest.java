@@ -9,6 +9,10 @@ import net.sourceforge.pinyin4j.multipinyin.MultiPinyinConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 /**
  * Created by 刘一波 on 16/3/4.
  * E-Mail:yibo.liu@tqmall.com
@@ -67,5 +71,43 @@ public class PinyinHelperStringTest {
                 .toHanYuPinyinString("女医明妃传..一五一十.吸血鬼", outputFormat, ";", false));
         Assert.assertEquals("nv;yi;ming;fei;zhuan;.;.;yi;wu;yi;shi;.;xi;xue;gui", PinyinHelper
                 .toHanYuPinyinString("女医明妃传..一五一十.吸血鬼", outputFormat, ";", true));
+    }
+
+    @Test
+    public void testRate() throws Exception {
+        BufferedReader bufferedReader = null;
+        InputStreamReader inputStreamReader = null;
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream("/Users/yiboliu/sougou.dic");
+            inputStreamReader = new InputStreamReader(fileInputStream);
+            bufferedReader = new BufferedReader(inputStreamReader);
+            long time = System.nanoTime();//时间
+            long times = 0;//次数
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                PinyinHelper.toHanYuPinyinString(line, outputFormat, null, false);
+                times++;
+            }
+            long lasted = System.nanoTime() - time;
+            System.out.println(String.format("共花费%s纳秒", lasted));
+            System.out.println(String.format("共转换%s次数", times));
+            long average = lasted / times;
+            System.out.println(String.format("平均耗时%s纳秒", average));
+            //平均耗时小于15微秒
+            Assert.assertTrue(average < 15000);
+        } finally {
+            try {
+                assert bufferedReader != null;
+                bufferedReader.close();
+            } catch (Exception e) {}
+            try {
+                inputStreamReader.close();
+            } catch (Exception e) {}
+            try {
+                fileInputStream.close();
+            } catch (Exception e) {}
+        }
+
     }
 }
