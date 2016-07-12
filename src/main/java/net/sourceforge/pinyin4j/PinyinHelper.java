@@ -292,8 +292,10 @@ public class PinyinHelper {
             } while (currentTrie != null);
 
             if (result == null) {//如果在前缀树中没有匹配到，那么它就不能转换为拼音，直接输出或者去掉
-                if (retain) resultPinyinStrBuf.append(chars[i]);
-                resultPinyinStrBuf.append(separate);
+                if (retain) {
+                    resultPinyinStrBuf.append(chars[i]);
+                    resultPinyinStrBuf.append(separate);
+                }
             } else {
                 String[] pinyinStrArray = resource.parsePinyinString(result);
                 if (pinyinStrArray != null) {
