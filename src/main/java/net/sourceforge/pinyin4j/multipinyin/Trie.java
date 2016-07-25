@@ -1,7 +1,19 @@
 package net.sourceforge.pinyin4j.multipinyin;
 
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by 刘一波 on 16/3/4.
@@ -60,6 +72,18 @@ public class Trie {
     /**
      * 加载多音字拼音词典
      *
+     * @param list 拼音列表
+     */
+    public synchronized void loadMultiPinyin(List<String> list) throws IOException {
+        for (String s : list) {
+            MultiPinyinConfig.logger.info(s);
+            handleMultiLine(s);
+        }
+    }
+
+    /**
+     * 加载多音字拼音词典
+     *
      * @param inStream 拼音文件输入流
      */
     public synchronized void loadMultiPinyin(InputStream inStream) throws IOException {
@@ -70,42 +94,7 @@ public class Trie {
             bufferedReader = new BufferedReader(inputStreamReader);
             String s;
             while ((s = bufferedReader.readLine()) != null) {
-                String[] keyAndValue = s.split(" ");
-                if (keyAndValue.length != 2) continue;
-
-                String key = keyAndValue[0];//多于一个字的字符串
-                String value = keyAndValue[1];//字符串的拼音
-                char[] keys = key.toCharArray();
-
-                Trie currentTrie = this;
-                for (int i = 0; i < keys.length; i++) {
-                    String hexString = Integer.toHexString(keys[i]).toUpperCase();
-
-                    Trie trieParent = currentTrie.get(hexString);
-                    if (trieParent == null) {//如果没有此值,直接put进去一个空对象
-                        currentTrie.put(hexString, new Trie());
-                        trieParent = currentTrie.get(hexString);
-                    }
-                    Trie trie = trieParent.getNextTire();//获取此对象的下一个
-
-                    if (keys.length - 1 == i) {//最后一个字了,需要把拼音写进去
-                        trieParent.pinyin = value;
-                        break;//此行其实并没有意义
-                    }
-
-                    if (trie == null) {
-                        if (keys.length - 1 != i) {
-                            //不是最后一个字,写入这个字的nextTrie,并匹配下一个
-                            Trie subTrie = new Trie();
-                            trieParent.setNextTire(subTrie);
-                            subTrie.put(Integer.toHexString(keys[i + 1]).toUpperCase(), new Trie());
-                            currentTrie = subTrie;
-                        }
-                    } else {
-                        currentTrie = trie;
-                    }
-
-                }
+                handleMultiLine(s);
             }
         } finally {
             if (inputStreamReader != null) inputStreamReader.close();
@@ -114,16 +103,126 @@ public class Trie {
     }
 
     /**
+     * 处理多音词的一行
+     *
+     * @param s 一行,一个词及其拼音
+     */
+    private void handleMultiLine(String s) {
+        String[] keyAndValue = s.split(" ");
+        if (keyAndValue.length != 2) return;
+
+        String key = keyAndValue[0];//多于一个字的字符串
+        String value = keyAndValue[1];//字符串的拼音
+        char[] keys = key.toCharArray();
+
+        Trie currentTrie = this;
+        for (int i = 0; i < keys.length; i++) {
+            String hexString = Integer.toHexString(keys[i]).toUpperCase();
+
+            Trie trieParent = currentTrie.get(hexString);
+            if (trieParent == null) {//如果没有此值,直接put进去一个空对象
+                currentTrie.put(hexString, new Trie());
+                trieParent = currentTrie.get(hexString);
+            }
+            Trie trie = trieParent.getNextTire();//获取此对象的下一个
+
+            if (keys.length - 1 == i) {//最后一个字了,需要把拼音写进去
+                trieParent.pinyin = value;
+                break;//此行其实并没有意义
+            }
+
+            if (trie == null) {
+                if (keys.length - 1 != i) {
+                    //不是最后一个字,写入这个字的nextTrie,并匹配下一个
+                    Trie subTrie = new Trie();
+                    trieParent.setNextTire(subTrie);
+                    subTrie.put(Integer.toHexString(keys[i + 1]).toUpperCase(), new Trie());
+                    currentTrie = subTrie;
+                }
+            } else {
+                currentTrie = trie;
+            }
+
+        }
+    }
+
+    /**
      * 加载用户自定义的扩展词库
      */
-    public void loadMultiPinyinExtend() throws IOException {
+    public synchronized void loadMultiPinyinExtend() throws IOException {
         String path = MultiPinyinConfig.multiPinyinPath;
         if (path != null) {
+            MultiPinyinConfig.logger.info("开始加载用户扩展文件多音词库");
             File userMultiPinyinFile = new File(path);
             if (userMultiPinyinFile.exists()) {
                 loadMultiPinyin(new FileInputStream(userMultiPinyinFile));
             }
         }
+    }
+
+    private static ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
+
+    /**
+     * 加载用户自定义的HTTP扩展词库,仅在定时任务中调用,延迟加载
+     */
+    public synchronized void loadMultiPinyinHttpExtend() throws IOException {
+        MultiPinyinConfig.logger.info("开始加载用户扩展HTTP多音词库");
+        loadMultiPinyin(getRemoteWords(MultiPinyinConfig.multiPinyinHttpPath));
+    }
+
+    /**
+     * 远程词库监控
+     */
+    public void monitor() {
+        String path = MultiPinyinConfig.multiPinyinHttpPath;
+        if (path != null) {
+            //建立监控线程
+            pool.scheduleAtFixedRate(new Monitor(path, this), 0, 60, TimeUnit.SECONDS);
+        }
+    }
+
+    /**
+     * 从远程服务器上下载自定义词条
+     */
+    private static List<String> getRemoteWords(String location) {
+
+        List<String> buffer = new ArrayList<String>();
+        RequestConfig rc = RequestConfig.custom().setConnectionRequestTimeout(10 * 1000)
+                .setConnectTimeout(10 * 1000).setSocketTimeout(60 * 1000).build();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response;
+        BufferedReader in;
+        HttpGet get = new HttpGet(location);
+        get.setConfig(rc);
+        try {
+            response = httpclient.execute(get);
+            if (response.getStatusLine().getStatusCode() == 200) {
+
+                String charset = "UTF-8";
+                //获取编码，默认为utf-8
+                if (response.getEntity().getContentType().getValue().contains("charset=")) {
+                    String contentType = response.getEntity().getContentType().getValue();
+                    charset = contentType.substring(contentType.lastIndexOf("=") + 1);
+                }
+                in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), charset));
+
+                String line;
+                while ((line = in.readLine()) != null) {
+                    buffer.add(line);
+                }
+                in.close();
+                response.close();
+                return buffer;
+            }
+            response.close();
+        } catch (ClientProtocolException e) {
+            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
+        } catch (IllegalStateException e) {
+            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
+        } catch (IOException e) {
+            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
+        }
+        return buffer;
     }
 
     public Trie get(String hexString) {

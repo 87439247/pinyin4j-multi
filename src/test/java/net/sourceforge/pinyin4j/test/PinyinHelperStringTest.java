@@ -5,6 +5,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import net.sourceforge.pinyin4j.multipinyin.MultiPinyinConfig;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by 刘一波 on 16/3/4.
@@ -109,5 +111,19 @@ public class PinyinHelperStringTest {
             } catch (Exception e) {}
         }
 
+    }
+
+    /**
+     * 测试远程词库是否可用
+     */
+    @Test
+    public void testRemoteDic() throws BadHanyuPinyinOutputFormatCombination, InterruptedException {
+        MultiPinyinConfig.multiPinyinHttpPath = "http://127.0.0.1:7777/ik_words/multi_pinyin.txt";
+
+        Assert.assertEquals("he;he;.;.;.", PinyinHelper.toHanYuPinyinString("呵呵...", outputFormat,
+                ";", true));
+        TimeUnit.SECONDS.sleep(1);
+        Assert.assertEquals("kong;tiao", PinyinHelper.toHanYuPinyinString("空调", outputFormat,
+                ";", true));
     }
 }

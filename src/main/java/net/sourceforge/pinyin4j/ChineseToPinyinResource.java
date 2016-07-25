@@ -72,6 +72,8 @@ class ChineseToPinyinResource {
 
             getUnicodeToHanyuPinyinTable().loadMultiPinyinExtend();
 
+            getUnicodeToHanyuPinyinTable().monitor();
+
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
