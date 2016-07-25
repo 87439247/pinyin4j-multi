@@ -173,7 +173,7 @@ public class Trie {
     /**
      * 远程词库监控
      */
-    public void monitor() {
+    public void monitor() throws IOException {
         String path = MultiPinyinConfig.multiPinyinHttpPath;
         if (path != null) {
             //建立监控线程
@@ -187,8 +187,9 @@ public class Trie {
     private static List<String> getRemoteWords(String location) {
 
         List<String> buffer = new ArrayList<String>();
-        RequestConfig rc = RequestConfig.custom().setConnectionRequestTimeout(10 * 1000)
-                .setConnectTimeout(10 * 1000).setSocketTimeout(60 * 1000).build();
+        RequestConfig rc =
+                RequestConfig.custom().setConnectionRequestTimeout(10 * 1000).setConnectTimeout(
+                        10 * 1000).setSocketTimeout(60 * 1000).build();
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response;
         BufferedReader in;
@@ -204,7 +205,9 @@ public class Trie {
                     String contentType = response.getEntity().getContentType().getValue();
                     charset = contentType.substring(contentType.lastIndexOf("=") + 1);
                 }
-                in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), charset));
+                in =
+                        new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
+                                charset));
 
                 String line;
                 while ((line = in.readLine()) != null) {

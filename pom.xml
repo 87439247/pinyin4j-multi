@@ -11,7 +11,7 @@
 
     <groupId>com.github.obiteaaron</groupId>
     <artifactId>pinyin4j-multi</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <name>Chinese to Pinyin Multi Tone</name>
     <description>Support Chinese character (both Simplified and Tranditional) to most popular Pinyin systems, including

@@ -116,14 +116,13 @@ public class PinyinHelperStringTest {
     /**
      * 测试远程词库是否可用
      */
-    @Test
     public void testRemoteDic() throws BadHanyuPinyinOutputFormatCombination, InterruptedException {
         MultiPinyinConfig.multiPinyinHttpPath = "http://127.0.0.1:7777/ik_words/multi_pinyin.txt";
 
         Assert.assertEquals("he;he;.;.;.", PinyinHelper.toHanYuPinyinString("呵呵...", outputFormat,
                 ";", true));
         TimeUnit.SECONDS.sleep(1);
-        Assert.assertEquals("kong;tiao", PinyinHelper.toHanYuPinyinString("空调", outputFormat,
-                ";", true));
+        Assert.assertEquals("kong;tiao", PinyinHelper.toHanYuPinyinString("空调", outputFormat, ";",
+                true));
     }
 }

@@ -52,8 +52,9 @@ public class Monitor implements Runnable {
     public void run() {
 
         //超时设置
-        RequestConfig rc = RequestConfig.custom().setConnectionRequestTimeout(10 * 1000)
-                .setConnectTimeout(10 * 1000).setSocketTimeout(15 * 1000).build();
+        RequestConfig rc =
+                RequestConfig.custom().setConnectionRequestTimeout(10 * 1000).setConnectTimeout(
+                        10 * 1000).setSocketTimeout(15 * 1000).build();
 
         HttpHead head = new HttpHead(location);
         head.setConfig(rc);
@@ -74,18 +75,24 @@ public class Monitor implements Runnable {
             //返回200 才做操作
             if (response.getStatusLine().getStatusCode() == 200) {
 
-                if (!response.getLastHeader("Last-Modified").getValue().equalsIgnoreCase(last_modified)
+                if (!response.getLastHeader("Last-Modified").getValue().equalsIgnoreCase(
+                        last_modified)
                         || !response.getLastHeader("ETag").getValue().equalsIgnoreCase(eTags)) {
                     trie.loadMultiPinyinHttpExtend();
                     // 远程词库有更新,需要重新加载词典，并修改last_modified,eTags
-                    last_modified = response.getLastHeader("Last-Modified") == null ? null : response.getLastHeader("Last-Modified").getValue();
-                    eTags = response.getLastHeader("ETag") == null ? null : response.getLastHeader("ETag").getValue();
+                    last_modified =
+                            response.getLastHeader("Last-Modified") == null ? null : response
+                                    .getLastHeader("Last-Modified").getValue();
+                    eTags =
+                            response.getLastHeader("ETag") == null ? null : response.getLastHeader(
+                                    "ETag").getValue();
                 }
             } else if (response.getStatusLine().getStatusCode() == 304) {
                 //没有修改，不做操作
                 //noop
             } else {
-                MultiPinyinConfig.logger.info("remote_ext_dict {} return bad code {}", location, response.getStatusLine().getStatusCode());
+                MultiPinyinConfig.logger.info("remote_ext_dict {} return bad code {}", location,
+                        response.getStatusLine().getStatusCode());
             }
 
         } catch (Exception e) {
