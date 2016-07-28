@@ -91,12 +91,12 @@ public class Monitor implements Runnable {
                 //没有修改，不做操作
                 //noop
             } else {
-                MultiPinyinConfig.logger.info("remote_ext_dict {} return bad code {}", location,
-                        response.getStatusLine().getStatusCode());
+                PinyinLogger.info("remote_ext_dict {} return bad code {}", location, response
+                        .getStatusLine().getStatusCode());
             }
 
         } catch (Exception e) {
-            MultiPinyinConfig.logger.error("remote_ext_dict {} error!", e, location);
+            PinyinLogger.error("remote_ext_dict {} error!", e, location);
         } finally {
             try {
                 if (response != null) {

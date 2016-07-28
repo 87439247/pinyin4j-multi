@@ -1,6 +1,5 @@
 package net.sourceforge.pinyin4j.multipinyin;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -10,6 +9,7 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -76,8 +76,8 @@ public class Trie {
      */
     public synchronized void loadMultiPinyin(List<String> list) throws IOException {
         for (String s : list) {
-            MultiPinyinConfig.logger.info(s);
             handleMultiLine(s);
+            PinyinLogger.info(s);
         }
     }
 
@@ -152,10 +152,22 @@ public class Trie {
     public synchronized void loadMultiPinyinExtend() throws IOException {
         String path = MultiPinyinConfig.multiPinyinPath;
         if (path != null) {
-            MultiPinyinConfig.logger.info("开始加载用户扩展文件多音词库");
-            File userMultiPinyinFile = new File(path);
-            if (userMultiPinyinFile.exists()) {
-                loadMultiPinyin(new FileInputStream(userMultiPinyinFile));
+            PinyinLogger.info(MultiPinyinConfig.multiPinyinPath);
+            PinyinLogger.info("开始加载用户扩展文件多音词库");
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(path))))) {
+                List<String> buffer = new LinkedList<>();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    buffer.add(line);
+                }
+
+                loadMultiPinyin(buffer);
+            } catch (Exception e) {
+                PinyinLogger
+                        .info("无法直接读取文件,如果是在ES中,请使用使用ES工具读取并设置路径,否则请使用HTTP词库或者直接传入文件流或词库列表:"
+                                + "PathUtils.get(\n"
+                                + "                        new File(Trie.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent(), \"config\")\n"
+                                + "                        .toAbsolutePath().toString();");
             }
         }
     }
@@ -166,7 +178,8 @@ public class Trie {
      * 加载用户自定义的HTTP扩展词库,仅在定时任务中调用,延迟加载
      */
     public synchronized void loadMultiPinyinHttpExtend() throws IOException {
-        MultiPinyinConfig.logger.info("开始加载用户扩展HTTP多音词库");
+        PinyinLogger.info("开始加载用户扩展HTTP多音词库");
+        PinyinLogger.info(MultiPinyinConfig.multiPinyinHttpPath);
         loadMultiPinyin(getRemoteWords(MultiPinyinConfig.multiPinyinHttpPath));
     }
 
@@ -191,12 +204,11 @@ public class Trie {
                 RequestConfig.custom().setConnectionRequestTimeout(10 * 1000).setConnectTimeout(
                         10 * 1000).setSocketTimeout(60 * 1000).build();
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        CloseableHttpResponse response;
-        BufferedReader in;
+        BufferedReader in = null;
+
         HttpGet get = new HttpGet(location);
         get.setConfig(rc);
-        try {
-            response = httpclient.execute(get);
+        try (CloseableHttpResponse response = httpclient.execute(get)) {
             if (response.getStatusLine().getStatusCode() == 200) {
 
                 String charset = "UTF-8";
@@ -213,17 +225,16 @@ public class Trie {
                 while ((line = in.readLine()) != null) {
                     buffer.add(line);
                 }
-                in.close();
-                response.close();
                 return buffer;
             }
-            response.close();
-        } catch (ClientProtocolException e) {
-            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
-        } catch (IllegalStateException e) {
-            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
-        } catch (IOException e) {
-            MultiPinyinConfig.logger.error("getRemoteWords {} error", e, location);
+        } catch (IllegalStateException | IOException e) {
+            PinyinLogger.error("getRemoteWords {} error", e, location);
+        } finally {
+            if (in != null) try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return buffer;
     }
